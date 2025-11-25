@@ -287,11 +287,11 @@ If you use this code or data, please cite:
 
 For questions about the code, data, or analyses, please:
 - Open an issue on GitHub
-- Contact the corresponding authors
+- Contact via email: xianl.cogneuro@gmail.com
 
 ## License
 
-[Specify license if applicable]
+This project is licensed under the MIT License.
 
 ## Notes
 
