@@ -1,0 +1,56 @@
+================================================================================
+DIVERGENCE FROM THE GROUP
+Memory Divergence vs Choice Divergence Correlation
+================================================================================
+
+Data source: romance_data2.xlsx
+  - corr_free18 sheet: 18 free subjects
+  - corr_free100 sheet: 100 free subjects
+
+Divergence scores:
+  - Memory divergence (rcl-1-r_otherm): 1 - correlation with group average recall
+  - Choice divergence (cho-1-r_otherm): 1 - correlation with group average choice
+
+================================================================================
+ANALYSIS: 18 Free Subjects
+================================================================================
+
+Memory Divergence:
+  N: 18
+  Mean: 0.6281
+  Std: 0.1130
+  Min: 0.4650
+  Max: 0.9440
+
+Choice Divergence:
+  N: 18
+  Mean: 0.5623
+  Std: 0.2513
+  Min: 0.2300
+  Max: 1.1820
+
+Correlation between Memory and Choice Divergence:
+  r(16) = 0.405, p = 0.095
+  Result: Not significant (p >= 0.05)
+
+================================================================================
+ANALYSIS: 100 Free Subjects
+================================================================================
+
+Memory Divergence:
+  N: 100
+  Mean: 0.5703
+  Std: 0.1095
+  Min: 0.3610
+  Max: 0.9440
+
+Choice Divergence:
+  N: 100
+  Mean: 0.4155
+  Std: 0.2094
+  Min: 0.0930
+  Max: 1.1820
+
+Correlation between Memory and Choice Divergence:
+  r(98) = 0.296, p = 0.003
+  Result: Significant correlation (p < 0.01)

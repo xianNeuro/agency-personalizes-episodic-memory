@@ -1,0 +1,36 @@
+================================================================================
+TEMPORAL VIOLATION RATE ANALYSIS
+================================================================================
+
+Data source:
+  - Adventure (BA): adventure_data2.xlsx (sheet: comp_conds)
+  - Romance (MV): romance_data2.xlsx (sheet: comp_conds18)
+
+Measure:
+  - Temporal violation rate (tv_rate): Rate of temporal violations
+
+================================================================================
+ADVENTURE STORY (BA)
+================================================================================
+
+One-way ANOVA across conditions:
+  F(2,113) = 2.56, p = 0.081463
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean = 0.0789, Std = 0.0801, N = 22
+    yoke: Mean = 0.0541, Std = 0.0553, N = 45
+    pasv: Mean = 0.0820, Std = 0.0604, N = 49
+
+================================================================================
+ROMANCE STORY (MV)
+================================================================================
+
+One-way ANOVA across conditions:
+  F(2,123) = 0.10, p = 0.908171
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean = 0.0874, Std = 0.0590, N = 18
+    yoke: Mean = 0.0865, Std = 0.0604, N = 53
+    pasv: Mean = 0.0914, Std = 0.0576, N = 55

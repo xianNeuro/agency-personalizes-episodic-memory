@@ -1,0 +1,43 @@
+================================================================================
+MEMORY DIVERGENCE AND SEMANTIC INFLUENCE CORRELATION ANALYSIS
+================================================================================
+
+Data source:
+  - Romance (MV): romance_data2.xlsx
+    - 18 Free participants: sheet corr_free18
+    - 100 Free participants: sheet corr_free100
+
+Measures:
+  - Memory divergence: rcl-1-r_otherm (1 - correlation with group average recall)
+  - Choice divergence: cho-1-r_otherm (1 - correlation with group average choice)
+  - Semantic influence: sem-ef (semantic centrality effect)
+
+================================================================================
+ROMANCE STORY: 18 Free Participants
+================================================================================
+
+Memory Divergence vs Semantic Influence:
+  N: 18
+  Correlation: r(16) = -0.519, p = 0.027256
+  Result: Significant negative correlation (p < 0.05)
+
+Choice Divergence vs Semantic Influence:
+  N: 18
+  Correlation: r(16) = -0.111, p = 0.662345
+  Result: Not significant (p >= 0.05)
+
+
+================================================================================
+ROMANCE STORY: 100 Free Participants
+================================================================================
+
+Memory Divergence vs Semantic Influence:
+  N: 100
+  Correlation: r(98) = -0.460, p = 0.000001
+  Result: Significant negative correlation (p < 0.001)
+
+Choice Divergence vs Semantic Influence:
+  N: 100
+  Correlation: r(98) = -0.164, p = 0.103673
+  Result: Not significant (p >= 0.05)
+

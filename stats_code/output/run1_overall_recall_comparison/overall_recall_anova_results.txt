@@ -1,0 +1,39 @@
+================================================================================
+OVERALL RECALL COMPARISON: ONE-WAY ANOVA RESULTS
+================================================================================
+
+This analysis compared overall recall across three agency conditions (Free, Yoked, Passive)
+for both the Adventure and Romance stories using one-way ANOVA.
+
+================================================================================
+ADVENTURE STORY
+================================================================================
+
+Group Means and Standard Deviations:
+  Free: M = 0.543, SD = 0.156, N = 22
+  Passive: M = 0.474, SD = 0.170, N = 49
+  Yoked: M = 0.503, SD = 0.153, N = 45
+
+One-Way ANOVA:
+  F(2,113) = 1.433, p = 0.243
+  Result: No significant difference across conditions (p >= 0.05)
+
+================================================================================
+ROMANCE STORY
+================================================================================
+
+Group Means and Standard Deviations:
+  Free: M = 0.455, SD = 0.225, N = 18
+  Passive: M = 0.494, SD = 0.213, N = 55
+  Yoked: M = 0.453, SD = 0.159, N = 53
+
+One-Way ANOVA:
+  F(2,123) = 0.671, p = 0.513
+  Result: No significant difference across conditions (p >= 0.05)
+
+================================================================================
+SUMMARY
+================================================================================
+
+Adventure Story: F(2,113) = 1.433, p = 0.243
+Romance Story: F(2,123) = 0.671, p = 0.513

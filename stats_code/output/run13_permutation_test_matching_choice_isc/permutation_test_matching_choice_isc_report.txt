@@ -1,0 +1,48 @@
+================================================================================
+PERMUTATION TEST FOR RECALL ISC WITH MATCHING CHOICE ISC
+================================================================================
+
+Method: Non-parametric permutation test with Choice ISC constraint
+  - Randomly sampled 1 Yoked participant from each of 18 story-paths
+  - Only kept samples where Yoked Choice ISC <= Free Choice ISC
+  - Repeated until 10,000 valid samples obtained
+  - Computed Recall ISC for each valid sample
+  - Compared Free condition's Recall ISC to Yoked distribution
+
+Random seed: 42 (for reproducibility)
+
+================================================================================
+ANALYSIS: 64 Shared Events
+================================================================================
+
+Free condition:
+  Choice ISC: 0.2077
+  Recall ISC: 0.1364
+
+Yoked condition (matching Choice ISC constraint):
+  Valid samples: 10000/10000
+  Choice ISC: Mean = 0.1875, Std = 0.0159
+  Recall ISC: Mean = 0.2123, Std = 0.0204
+
+Statistical test:
+  One-tailed test: p = 0.000000 (proportion of Yoked samples below Free Recall ISC)
+  One-sample t-test: t(9999) = 372.2638, p = 0.000000
+  Result: Free Recall ISC significantly lower than Yoked (p < 0.001)
+
+================================================================================
+ANALYSIS: 49 Non-Choice Events
+================================================================================
+
+Free condition:
+  Choice ISC: 0.2077
+  Recall ISC: 0.1568
+
+Yoked condition (matching Choice ISC constraint):
+  Valid samples: 10000/10000
+  Choice ISC: Mean = 0.1875, Std = 0.0159
+  Recall ISC: Mean = 0.2012, Std = 0.0221
+
+Statistical test:
+  One-tailed test: p = 0.015400 (proportion of Yoked samples below Free Recall ISC)
+  One-sample t-test: t(9999) = 200.5760, p = 0.000000
+  Result: Free Recall ISC significantly lower than Yoked (p < 0.05)

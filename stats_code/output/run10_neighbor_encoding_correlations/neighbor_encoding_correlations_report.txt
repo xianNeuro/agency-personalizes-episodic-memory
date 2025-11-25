@@ -1,0 +1,66 @@
+================================================================================
+NEIGHBOR ENCODING EFFECT CORRELATIONS AND MULTIPLE REGRESSION
+================================================================================
+
+Data source:
+  - Adventure (BA): adventure_data2.xlsx (sheet: corr_free22)
+  - Romance (MV): romance_data2.xlsx
+    - 18 Free participants: sheet corr_free18
+    - 100 Free participants: sheet corr_free100
+
+================================================================================
+1. NEIGHBOR ENCODING EFFECT vs MEMORY DIVERGENCE (Romance)
+================================================================================
+
+The neighbor encoding effect was also positively associated with memory
+divergence in Free participants. In other words, the more a participant's
+recall deviated from other participants in the group, the more that
+participant's neighboring events tended to have the same recall status
+(remembered or forgotten).
+
+Romance (18 Free participants):
+  Correlation: r(16) = 0.496, p = 0.036442
+  Result: Significant positive correlation (p < 0.05)
+
+Romance (100 Free participants):
+  Correlation: r(98) = 0.304, p = 0.002119
+  Result: Significant positive correlation (p < 0.01)
+
+================================================================================
+2. NEIGHBOR ENCODING EFFECT vs SEMANTIC INFLUENCE
+================================================================================
+
+The neighbor encoding effect was negatively correlated with semantic
+influence scores in Free participants, across both stories.
+
+Adventure (22 Free participants):
+  Correlation: r(20) = -0.348, p = 0.112741
+  Result: Not significant (p >= 0.05)
+
+Romance (18 Free participants):
+  Correlation: r(16) = -0.324, p = 0.189318
+  Result: Not significant (p >= 0.05)
+
+Romance (100 Free participants):
+  Correlation: r(98) = -0.347, p = 0.000402
+  Result: Significant negative correlation (p < 0.001)
+
+================================================================================
+3. MULTIPLE LINEAR REGRESSION (Romance, 100 Free participants)
+================================================================================
+
+When including both semantic influence and the neighbor encoding scores
+in a multiple linear regression predicting memory divergence:
+
+Multiple Linear Regression: Memory Divergence ~ Neighbor Encoding + Semantic Influence
+  N: 100
+  R-squared: 0.2354
+  Adjusted R-squared: 0.2196
+
+  Coefficients:
+    Neighbor Encoding Effect: Coef = 0.0890, p = 0.086790
+    Semantic Influence: Coef = -0.4146, p = 0.000047
+
+  Results:
+    Neighbor Encoding Effect: Trend (p = 0.087)
+    Semantic Influence: Significant (p < 0.001)

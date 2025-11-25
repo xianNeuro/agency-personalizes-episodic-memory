@@ -1,0 +1,163 @@
+================================================================================
+NEIGHBOR ENCODING EFFECT ANALYSIS
+================================================================================
+
+Data source:
+  - Adventure (BA): adventure_data2.xlsx (sheet: comp_conds)
+  - Romance (MV): romance_data2.xlsx (sheet: comp_conds18)
+
+Measure:
+  - Neighbor encoding effect (nghb-ef): Tendency for temporally neighboring
+    events at encoding to share the same subsequent memory status
+
+================================================================================
+ADVENTURE STORY (BA)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW VALUES
+--------------------------------------------------------------------------------
+
+One-sample t-tests against zero:
+  FREE Condition:
+    N: 22
+    Mean r: 0.2821
+    Std: 0.2168
+    t(21) = 6.1027, p = 0.000005
+    Result: Significantly positive (p < 0.001)
+  YOKE Condition:
+    N: 45
+    Mean r: 0.2352
+    Std: 0.2547
+    t(44) = 6.1933, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+  PASV Condition:
+    N: 49
+    Mean r: 0.2388
+    Std: 0.1919
+    t(48) = 8.7141, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+
+One-way ANOVA across conditions:
+  F(2,113) = 0.37, p = 0.693205
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean r = 0.2821, Std = 0.2168, N = 22
+    yoke: Mean r = 0.2352, Std = 0.2547, N = 45
+    pasv: Mean r = 0.2388, Std = 0.1919, N = 49
+
+
+--------------------------------------------------------------------------------
+ANALYSIS: FISHER Z-TRANSFORMED
+--------------------------------------------------------------------------------
+
+One-sample t-tests against zero:
+  FREE Condition:
+    N: 22
+    Mean z: 0.3096
+    Std: 0.2581
+    t(21) = 5.6249, p = 0.000014
+    Result: Significantly positive (p < 0.001)
+  YOKE Condition:
+    N: 45
+    Mean z: 0.2591
+    Std: 0.2883
+    t(44) = 6.0301, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+  PASV Condition:
+    N: 49
+    Mean z: 0.2540
+    Std: 0.2111
+    t(48) = 8.4214, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+
+One-way ANOVA across conditions:
+  F(2,113) = 0.40, p = 0.671421
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean z = 0.3096, Std = 0.2581, N = 22
+    yoke: Mean z = 0.2591, Std = 0.2883, N = 45
+    pasv: Mean z = 0.2540, Std = 0.2111, N = 49
+
+
+================================================================================
+ROMANCE STORY (MV)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW VALUES
+--------------------------------------------------------------------------------
+
+One-sample t-tests against zero:
+  FREE Condition:
+    N: 18
+    Mean r: 0.3522
+    Std: 0.1969
+    t(17) = 7.5892, p = 0.000001
+    Result: Significantly positive (p < 0.001)
+  YOKE Condition:
+    N: 53
+    Mean r: 0.1864
+    Std: 0.1832
+    t(52) = 7.4094, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+  PASV Condition:
+    N: 55
+    Mean r: 0.1258
+    Std: 0.1452
+    t(54) = 6.4265, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+
+One-way ANOVA across conditions:
+  F(2,123) = 12.07, p = 0.000016
+  Result: Significant difference across conditions (p < 0.001)
+
+  Means by condition:
+    free: Mean r = 0.3522, Std = 0.1969, N = 18
+    yoke: Mean r = 0.1864, Std = 0.1832, N = 53
+    pasv: Mean r = 0.1258, Std = 0.1452, N = 55
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(69) = 3.2548, p = 0.001759
+    Free Vs Vs Vs Pasv: t(71) = 5.2381, p = 0.000002
+
+
+--------------------------------------------------------------------------------
+ANALYSIS: FISHER Z-TRANSFORMED
+--------------------------------------------------------------------------------
+
+One-sample t-tests against zero:
+  FREE Condition:
+    N: 18
+    Mean z: 0.3830
+    Std: 0.2252
+    t(17) = 7.2162, p = 0.000001
+    Result: Significantly positive (p < 0.001)
+  YOKE Condition:
+    N: 53
+    Mean z: 0.1974
+    Std: 0.2025
+    t(52) = 7.0946, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+  PASV Condition:
+    N: 55
+    Mean z: 0.1300
+    Std: 0.1529
+    t(54) = 6.3064, p = 0.000000
+    Result: Significantly positive (p < 0.001)
+
+One-way ANOVA across conditions:
+  F(2,123) = 12.56, p = 0.000011
+  Result: Significant difference across conditions (p < 0.001)
+
+  Means by condition:
+    free: Mean z = 0.3830, Std = 0.2252, N = 18
+    yoke: Mean z = 0.1974, Std = 0.2025, N = 53
+    pasv: Mean z = 0.1300, Std = 0.1529, N = 55
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(69) = 3.2664, p = 0.001698
+    Free Vs Vs Vs Pasv: t(71) = 5.3878, p = 0.000001
+

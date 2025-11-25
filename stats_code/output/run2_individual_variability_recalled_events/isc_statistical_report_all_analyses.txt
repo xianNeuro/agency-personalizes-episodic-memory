@@ -1,0 +1,173 @@
+================================================================================
+INDIVIDUAL VARIABILITY IN RECALLED EVENTS
+Inter-Participant Correlation (ISC) Analysis - All Four Analyses
+================================================================================
+
+This analysis computed pairwise Pearson correlations between all pairs of
+participants' recall performance vectors for shared story sections in the
+Romance story. Four analyses were performed:
+1. 64 shared events, raw correlation r-values
+2. 49 non-choice shared events, raw correlation r-values
+3. 64 shared events, Fisher z-transformed r-values
+4. 49 non-choice shared events, Fisher z-transformed r-values
+
+For each analysis, one-sample t-tests, ANOVA, and post-hoc tests were performed.
+
+================================================================================
+ANALYSIS 1: 64 SHARED EVENTS - RAW R-VALUES
+================================================================================
+
+ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from zero):
+
+FREE condition:
+  N pairs = 153
+  Mean = 0.1364
+  t(152) = 11.7457, p < 0.001
+
+YOKE condition:
+  N pairs = 1378
+  Mean = 0.2255
+  t(1377) = 58.2879, p < 0.001
+
+PASV condition:
+  N pairs = 1485
+  Mean = 0.2488
+  t(1484) = 70.8707, p < 0.001
+
+ANOVA ACROSS CONDITIONS:
+
+  F(2,3013) = 48.1268, p < 0.001
+
+POST-HOC TESTS:
+
+Free vs Yoked:
+  t = -7.2850, p < 0.001
+
+Free vs Passive:
+  t = -9.7308, p < 0.001
+
+Yoked vs Passive:
+  t = -4.4632, p < 0.001
+
+
+================================================================================
+ANALYSIS 2: 49 NON-CHOICE EVENTS - RAW R-VALUES
+================================================================================
+
+ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from zero):
+
+FREE condition:
+  N pairs = 153
+  Mean = 0.1568
+  t(152) = 13.2116, p < 0.001
+
+YOKE condition:
+  N pairs = 1378
+  Mean = 0.2187
+  t(1377) = 51.4285, p < 0.001
+
+PASV condition:
+  N pairs = 1485
+  Mean = 0.2287
+  t(1484) = 59.0277, p < 0.001
+
+ANOVA ACROSS CONDITIONS:
+
+  F(2,3013) = 15.4453, p < 0.001
+
+POST-HOC TESTS:
+
+Free vs Yoked:
+  t = -4.6320, p < 0.001
+
+Free vs Passive:
+  t = -5.6785, p < 0.001
+
+Yoked vs Passive:
+  t = -1.7388, p = 0.082
+
+
+================================================================================
+ANALYSIS 3: 64 SHARED EVENTS - FISHER Z-TRANSFORMED
+================================================================================
+
+ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from zero):
+
+FREE condition:
+  N pairs = 153
+  Mean = 0.1398
+  t(152) = 11.6723, p < 0.001
+
+YOKE condition:
+  N pairs = 1378
+  Mean = 0.2351
+  t(1377) = 55.8268, p < 0.001
+
+PASV condition:
+  N pairs = 1485
+  Mean = 0.2598
+  t(1484) = 67.2585, p < 0.001
+
+ANOVA ACROSS CONDITIONS:
+
+  F(2,3013) = 45.9551, p < 0.001
+
+POST-HOC TESTS:
+
+Free vs Yoked:
+  t = -7.1898, p < 0.001
+
+Free vs Passive:
+  t = -9.4960, p < 0.001
+
+Yoked vs Passive:
+  t = -4.3224, p < 0.001
+
+
+================================================================================
+ANALYSIS 4: 49 NON-CHOICE EVENTS - FISHER Z-TRANSFORMED
+================================================================================
+
+ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from zero):
+
+FREE condition:
+  N pairs = 153
+  Mean = 0.1614
+  t(152) = 13.0774, p < 0.001
+
+YOKE condition:
+  N pairs = 1378
+  Mean = 0.2291
+  t(1377) = 49.0285, p < 0.001
+
+PASV condition:
+  N pairs = 1485
+  Mean = 0.2393
+  t(1484) = 55.8783, p < 0.001
+
+ANOVA ACROSS CONDITIONS:
+
+  F(2,3013) = 14.9747, p < 0.001
+
+POST-HOC TESTS:
+
+Free vs Yoked:
+  t = -4.6357, p < 0.001
+
+Free vs Passive:
+  t = -5.5997, p < 0.001
+
+Yoked vs Passive:
+  t = -1.6095, p = 0.108
+
+
+================================================================================
+SUMMARY
+================================================================================
+
+All four analyses show consistent patterns:
+- Recall ISC is significantly above zero in all three conditions
+- Free participants show reduced Recall ISC relative to Yoked and Passive participants
+- Results are robust across both raw and z-transformed correlations
+- Results are robust when including or excluding choice events
+

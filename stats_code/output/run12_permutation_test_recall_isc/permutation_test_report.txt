@@ -1,0 +1,50 @@
+================================================================================
+PERMUTATION TEST FOR RECALL ISC
+================================================================================
+
+Method: Non-parametric permutation test
+  - Randomly sampled 1 Yoked and 1 Passive participant from each of 18 story-paths
+  - Repeated 10,000 times to generate distributions
+  - Compared Free condition's Recall ISC to these distributions
+
+Random seed: 42 (for reproducibility)
+
+================================================================================
+ANALYSIS: 64 Shared Events
+================================================================================
+
+Free condition mean ISC: 0.1364
+
+Permutation distributions:
+  Yoked: Mean = 0.2183, Std = 0.0201, N = 10000
+  Passive: Mean = 0.2530, Std = 0.0180, N = 10000
+
+Statistical tests:
+  Free vs Yoked: p = 0.000000 (proportion of Yoked samples below Free mean)
+    Result: Free ISC significantly lower than Yoked (p < 0.001)
+
+  Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
+    Result: Free ISC significantly lower than Passive (p < 0.001)
+
+  Yoked vs Passive: t = -128.6124, p = 0.000000
+    Result: Significant difference (p < 0.001)
+
+================================================================================
+ANALYSIS: 49 Non-Choice Events
+================================================================================
+
+Free condition mean ISC: 0.1568
+
+Permutation distributions:
+  Yoked: Mean = 0.2075, Std = 0.0212, N = 10000
+  Passive: Mean = 0.2326, Std = 0.0193, N = 10000
+
+Statistical tests:
+  Free vs Yoked: p = 0.007000 (proportion of Yoked samples below Free mean)
+    Result: Free ISC significantly lower than Yoked (p < 0.01)
+
+  Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
+    Result: Free ISC significantly lower than Passive (p < 0.001)
+
+  Yoked vs Passive: t = -87.6446, p = 0.000000
+    Result: Significant difference (p < 0.001)

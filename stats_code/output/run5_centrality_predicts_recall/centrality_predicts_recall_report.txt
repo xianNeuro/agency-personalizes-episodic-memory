@@ -1,0 +1,255 @@
+================================================================================
+EVENT RECALL PREDICTED BY SEMANTIC AND CAUSAL CENTRALITY
+================================================================================
+
+Data source:
+  - Adventure (BA): adventure_data2.xlsx
+  - Romance (MV): romance_data2.xlsx
+
+Centrality measures:
+  - Semantic centrality (sem-ef): Semantic influence on memory
+  - Causal centrality (caus-ef): Causal influence on memory
+
+Analysis: One-sample t-tests against zero for each condition
+
+================================================================================
+ADVENTURE STORY (BA)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW
+--------------------------------------------------------------------------------
+
+FREE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 22
+    Mean r: 0.2226
+    Std: 0.1870
+    One-sample t-test (vs 0):
+      t(21) = 5.5822, p = 0.000015
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 22
+    Mean r: 0.1869
+    Std: 0.1904
+    One-sample t-test (vs 0):
+      t(21) = 4.6042, p = 0.000153
+    Result: Significant causal influence on memory (p < 0.001)
+
+YOKE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 45
+    Mean r: 0.3226
+    Std: 0.1346
+    One-sample t-test (vs 0):
+      t(44) = 16.0707, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 45
+    Mean r: 0.1588
+    Std: 0.1953
+    One-sample t-test (vs 0):
+      t(44) = 5.4528, p = 0.000002
+    Result: Significant causal influence on memory (p < 0.001)
+
+PASV Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 49
+    Mean r: 0.3075
+    Std: 0.1698
+    One-sample t-test (vs 0):
+      t(48) = 12.6811, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 49
+    Mean r: 0.1263
+    Std: 0.1796
+    One-sample t-test (vs 0):
+      t(48) = 4.9216, p = 0.000011
+    Result: Significant causal influence on memory (p < 0.001)
+
+--------------------------------------------------------------------------------
+ANALYSIS: Z
+(Fisher z-transformed)
+--------------------------------------------------------------------------------
+
+FREE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 22
+    Mean z: 0.2342
+    Std: 0.2003
+    One-sample t-test (vs 0):
+      t(21) = 5.4834, p = 0.000019
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 22
+    Mean z: 0.1938
+    Std: 0.1997
+    One-sample t-test (vs 0):
+      t(21) = 4.5536, p = 0.000173
+    Result: Significant causal influence on memory (p < 0.001)
+
+YOKE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 45
+    Mean z: 0.3417
+    Std: 0.1525
+    One-sample t-test (vs 0):
+      t(44) = 15.0310, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 45
+    Mean z: 0.1660
+    Std: 0.2070
+    One-sample t-test (vs 0):
+      t(44) = 5.3814, p = 0.000003
+    Result: Significant causal influence on memory (p < 0.001)
+
+PASV Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 49
+    Mean z: 0.3285
+    Std: 0.1921
+    One-sample t-test (vs 0):
+      t(48) = 11.9677, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 49
+    Mean z: 0.1321
+    Std: 0.1905
+    One-sample t-test (vs 0):
+      t(48) = 4.8544, p = 0.000013
+    Result: Significant causal influence on memory (p < 0.001)
+
+================================================================================
+ROMANCE STORY (MV)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW
+--------------------------------------------------------------------------------
+
+FREE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 18
+    Mean r: 0.1461
+    Std: 0.1015
+    One-sample t-test (vs 0):
+      t(17) = 6.1087, p = 0.000012
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 18
+    Mean r: 0.2135
+    Std: 0.1052
+    One-sample t-test (vs 0):
+      t(17) = 8.6132, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)
+
+YOKE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 53
+    Mean r: 0.2212
+    Std: 0.0847
+    One-sample t-test (vs 0):
+      t(52) = 19.0214, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 53
+    Mean r: 0.2358
+    Std: 0.1192
+    One-sample t-test (vs 0):
+      t(52) = 14.3978, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)
+
+PASV Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 55
+    Mean r: 0.2653
+    Std: 0.0984
+    One-sample t-test (vs 0):
+      t(54) = 20.0027, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 55
+    Mean r: 0.2442
+    Std: 0.0755
+    One-sample t-test (vs 0):
+      t(54) = 23.9878, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)
+
+--------------------------------------------------------------------------------
+ANALYSIS: Z
+(Fisher z-transformed)
+--------------------------------------------------------------------------------
+
+FREE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 18
+    Mean z: 0.1486
+    Std: 0.1040
+    One-sample t-test (vs 0):
+      t(17) = 6.0615, p = 0.000013
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 18
+    Mean z: 0.2198
+    Std: 0.1142
+    One-sample t-test (vs 0):
+      t(17) = 8.1686, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)
+
+YOKE Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 53
+    Mean z: 0.2266
+    Std: 0.0895
+    One-sample t-test (vs 0):
+      t(52) = 18.4315, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 53
+    Mean z: 0.2442
+    Std: 0.1282
+    One-sample t-test (vs 0):
+      t(52) = 13.8660, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)
+
+PASV Condition:
+
+  Semantic Centrality (sem-ef):
+    N: 55
+    Mean z: 0.2748
+    Std: 0.1071
+    One-sample t-test (vs 0):
+      t(54) = 19.0345, p = 0.000000
+    Result: Significant semantic influence on memory (p < 0.001)
+
+  Causal Centrality (caus-ef):
+    N: 55
+    Mean z: 0.2508
+    Std: 0.0807
+    One-sample t-test (vs 0):
+      t(54) = 23.0586, p = 0.000000
+    Result: Significant causal influence on memory (p < 0.001)

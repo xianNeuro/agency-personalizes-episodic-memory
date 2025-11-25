@@ -1,0 +1,40 @@
+================================================================================
+AGENCY DENIAL EFFECT ON CHOICE EVENTS MEMORY
+================================================================================
+
+Analysis: Having one's agency denied can have unique memory effects
+at local choice events: one's memory for the denied choice events
+is selectively reduced compared to its choice-granted counterparts
+in the Free condition.
+
+================================================================================
+ADVENTURE STORY (BA)
+================================================================================
+
+Matched pairs analyzed: 45
+
+Two-sample t-test: Denied Choice Events (Yoked not-want) vs Granted Choice Events (Free not-want)
+  Yoked not-want (denied) events: Mean = 0.3439, Std = 0.2479
+  Free not-want (granted) events: Mean = 0.4848, Std = 0.2868
+  t(88) = -2.4936, p = 0.014517
+  Result: Significant difference (p < 0.05)
+
+For comparison - Want events:
+  Yoked want events: Mean = 0.3420, Std = 0.2609
+  Free want events: Mean = 0.3974, Std = 0.2461
+
+================================================================================
+ROMANCE STORY (MV)
+================================================================================
+
+Matched pairs analyzed: 53
+
+Two-sample t-test: Denied Choice Events (Yoked not-want) vs Granted Choice Events (Free not-want)
+  Yoked not-want (denied) events: Mean = 0.2781, Std = 0.1954
+  Free not-want (granted) events: Mean = 0.3807, Std = 0.2363
+  t(104) = -2.4366, p = 0.016526
+  Result: Significant difference (p < 0.05)
+
+For comparison - Want events:
+  Yoked want events: Mean = 0.3190, Std = 0.2024
+  Free want events: Mean = 0.3662, Std = 0.2382

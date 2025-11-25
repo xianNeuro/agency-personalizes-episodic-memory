@@ -1,0 +1,151 @@
+================================================================================
+AGENCY REDUCED THE INFLUENCE OF SEMANTIC BUT NOT CAUSAL CENTRALITY
+================================================================================
+
+Data source:
+  - Adventure (BA): adventure_data2.xlsx
+  - Romance (MV): romance_data2.xlsx
+
+Measures:
+  - Semantic centrality (sem-ef): Semantic influence on memory
+  - Causal centrality (caus-ef): Causal influence on memory
+
+================================================================================
+ADVENTURE STORY (BA)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW VALUES
+--------------------------------------------------------------------------------
+
+Semantic Centrality (sem-ef) - One-way ANOVA (Raw values):
+  F(2,113) = 3.04, p = 0.051956
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean r = 0.2226, Std = 0.1870, N = 22
+    yoke: Mean r = 0.3226, Std = 0.1346, N = 45
+    pasv: Mean r = 0.3075, Std = 0.1698, N = 49
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(65) = -2.5032, p = 0.014828
+    Free Vs Vs Vs Pasv: t(69) = -1.8892, p = 0.063073
+    Yoke Vs Vs Vs Pasv: t(92) = 0.4733, p = 0.637101
+
+Causal Centrality (caus-ef) - One-way ANOVA (Raw values):
+  F(2,113) = 0.86, p = 0.424416
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean r = 0.1869, Std = 0.1904, N = 22
+    yoke: Mean r = 0.1588, Std = 0.1953, N = 45
+    pasv: Mean r = 0.1263, Std = 0.1796, N = 49
+
+Repeated Measures ANOVA (Network Type × Condition) - Interaction Effect (Raw values):
+  (Network Type: within-subjects, Condition: between-subjects)
+  F(2,113) = 3.27, p = 0.041534
+  Result: Significant interaction (p < 0.05)
+
+
+--------------------------------------------------------------------------------
+ANALYSIS: FISHER Z-TRANSFORMED
+--------------------------------------------------------------------------------
+
+Semantic Centrality (sem-ef) - One-way ANOVA (Fisher z-transformed):
+  F(2,113) = 2.87, p = 0.060861
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean z = 0.2342, Std = 0.2003, N = 22
+    yoke: Mean z = 0.3417, Std = 0.1525, N = 45
+    pasv: Mean z = 0.3285, Std = 0.1921, N = 49
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(65) = -2.4406, p = 0.017399
+    Free Vs Vs Vs Pasv: t(69) = -1.8880, p = 0.063236
+    Yoke Vs Vs Vs Pasv: t(92) = 0.3685, p = 0.713374
+
+Causal Centrality (caus-ef) - One-way ANOVA (Fisher z-transformed):
+  F(2,113) = 0.81, p = 0.447972
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean z = 0.1938, Std = 0.1997, N = 22
+    yoke: Mean z = 0.1660, Std = 0.2070, N = 45
+    pasv: Mean z = 0.1321, Std = 0.1905, N = 49
+
+Repeated Measures ANOVA (Network Type × Condition) - Interaction Effect (Fisher z-transformed):
+  (Network Type: within-subjects, Condition: between-subjects)
+  F(2,113) = 3.18, p = 0.045547
+  Result: Significant interaction (p < 0.05)
+
+
+================================================================================
+ROMANCE STORY (MV)
+================================================================================
+
+--------------------------------------------------------------------------------
+ANALYSIS: RAW VALUES
+--------------------------------------------------------------------------------
+
+Semantic Centrality (sem-ef) - One-way ANOVA (Raw values):
+  F(2,123) = 11.46, p = 0.000027
+  Result: Significant difference across conditions (p < 0.001)
+
+  Means by condition:
+    free: Mean r = 0.1461, Std = 0.1015, N = 18
+    yoke: Mean r = 0.2212, Std = 0.0847, N = 53
+    pasv: Mean r = 0.2653, Std = 0.0984, N = 55
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(69) = -3.0900, p = 0.002885
+    Free Vs Vs Vs Pasv: t(71) = -4.4290, p = 0.000034
+    Yoke Vs Vs Vs Pasv: t(106) = -2.4929, p = 0.014217
+
+Causal Centrality (caus-ef) - One-way ANOVA (Raw values):
+  F(2,123) = 0.64, p = 0.529963
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean r = 0.2135, Std = 0.1052, N = 18
+    yoke: Mean r = 0.2358, Std = 0.1192, N = 53
+    pasv: Mean r = 0.2442, Std = 0.0755, N = 55
+
+Repeated Measures ANOVA (Network Type × Condition) - Interaction Effect (Raw values):
+  (Network Type: within-subjects, Condition: between-subjects)
+  F(2,123) = 2.99, p = 0.053938
+  Result: No significant interaction (p >= 0.05)
+
+
+--------------------------------------------------------------------------------
+ANALYSIS: FISHER Z-TRANSFORMED
+--------------------------------------------------------------------------------
+
+Semantic Centrality (sem-ef) - One-way ANOVA (Fisher z-transformed):
+  F(2,123) = 11.34, p = 0.000030
+  Result: Significant difference across conditions (p < 0.001)
+
+  Means by condition:
+    free: Mean z = 0.1486, Std = 0.1040, N = 18
+    yoke: Mean z = 0.2266, Std = 0.0895, N = 53
+    pasv: Mean z = 0.2748, Std = 0.1071, N = 55
+
+  Post-hoc t-tests:
+    Free Vs Vs Vs Yoke: t(69) = -3.0664, p = 0.003092
+    Free Vs Vs Vs Pasv: t(71) = -4.3707, p = 0.000042
+    Yoke Vs Vs Vs Pasv: t(106) = -2.5314, p = 0.012827
+
+Causal Centrality (caus-ef) - One-way ANOVA (Fisher z-transformed):
+  F(2,123) = 0.56, p = 0.571628
+  Result: No significant difference (p >= 0.05)
+
+  Means by condition:
+    free: Mean z = 0.2198, Std = 0.1142, N = 18
+    yoke: Mean z = 0.2442, Std = 0.1282, N = 53
+    pasv: Mean z = 0.2508, Std = 0.0807, N = 55
+
+Repeated Measures ANOVA (Network Type × Condition) - Interaction Effect (Fisher z-transformed):
+  (Network Type: within-subjects, Condition: between-subjects)
+  F(2,123) = 3.08, p = 0.049585
+  Result: Significant interaction (p < 0.05)
+

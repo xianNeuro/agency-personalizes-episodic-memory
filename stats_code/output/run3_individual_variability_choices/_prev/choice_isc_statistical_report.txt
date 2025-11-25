@@ -1,0 +1,54 @@
+================================================================================
+INDIVIDUAL VARIABILITY IN CHOICES MADE
+Choice ISC Analysis Results
+================================================================================
+
+Data source: romance_data2.xlsx, sheet 'merge_isc', column 'choice_pw-isc'
+
+================================================================================
+ANALYSIS: RAW
+================================================================================
+
+FREE Condition:
+  N pairs: 153
+  Mean r: 0.2077
+  Std: 0.2691
+  One-sample t-test (vs 0):
+    t(152) = 9.5445, p = 0.000000
+
+YOKE Condition:
+  N pairs: 1378
+  Mean r: 0.2547
+  Std: 0.2612
+  One-sample t-test (vs 0):
+    t(1377) = 36.1928, p = 0.000000
+
+FREE vs YOKED Comparison:
+  Free mean r: 0.2077 (N=153)
+  Yoke mean r: 0.2547 (N=1378)
+  Two-sample t-test:
+    t = -2.1069, p = 0.035286
+
+================================================================================
+ANALYSIS: Z TRANSFORMED
+================================================================================
+
+FREE Condition:
+  N pairs: 153
+  Mean z: 0.2328
+  Std: 0.3154
+  One-sample t-test (vs 0):
+    t(152) = 9.1300, p = 0.000000
+
+YOKE Condition:
+  N pairs: 1378
+  Mean z: 0.2891
+  Std: 0.3443
+  One-sample t-test (vs 0):
+    t(1377) = 31.1723, p = 0.000000
+
+FREE vs YOKED Comparison:
+  Free mean z: 0.2328 (N=153)
+  Yoke mean z: 0.2891 (N=1378)
+  Two-sample t-test:
+    t = -1.9346, p = 0.053230
