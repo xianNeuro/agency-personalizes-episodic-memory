@@ -90,7 +90,7 @@
 </head>
 <body>
     <h1>Comprehensive Analysis Report: Agency Effects on Memory</h1>
-    <p><em>Generated: 2025-11-26 16:53:56</em></p>
+    <p><em>Generated: 2025-11-26 17:36:18</em></p>
     <p><em>This report contains the manuscript main results section with full statistics inserted from analyses run1 through run13.</em></p>
 
 
@@ -246,8 +246,8 @@ ANALYSIS: 64 Shared Events
 Free condition mean ISC: 0.1364
 
 Permutation distributions:
-  Yoked: Mean = 0.2183, Std = 0.0201, N = 10000
-  Passive: Mean = 0.2530, Std = 0.0180, N = 10000
+  Yoked: Mean = 0.2185, Std = 0.0201, N = 10000
+  Passive: Mean = 0.2531, Std = 0.0180, N = 10000
 
 Statistical tests:
   Free vs Yoked: p = 0.000000 (proportion of Yoked samples below Free mean)
@@ -256,7 +256,7 @@ Statistical tests:
   Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
     Result: Free ISC significantly lower than Passive (p < 0.001)
 
-  Yoked vs Passive: t = -128.5791, p = 0.000000
+  Yoked vs Passive: t = -128.3238, p = 0.000000
     Result: Significant difference (p < 0.001)
 
 ================================================================================
@@ -423,20 +423,32 @@ free100: r(98) = 0.296, p = 0.0028<br>
             semantic centrality and recall (an event-by-event vector of remembered=1, forgotten=0) for each participant.</p>
 
 <div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Raw values):</strong><br>
-Adventure FREE Semantic: t(21) = 5.582, p = 0.000015<br>
-Adventure FREE Causal: t(21) = 4.604, p = 0.000153<br>
-Adventure YOKE Semantic: t(44) = 16.071, p = 0.000000<br>
-Adventure YOKE Causal: t(44) = 5.453, p = 0.000002<br>
-Adventure PASV Semantic: t(48) = 12.681, p = 0.000000<br>
-Adventure PASV Causal: t(48) = 4.922, p = 0.000011<br>
-Romance FREE Semantic: t(17) = 6.109, p = 0.000012<br>
-Romance FREE Causal: t(17) = 8.613, p = 0.000000<br>
-Romance YOKE Semantic: t(52) = 19.021, p = 0.000000<br>
-Romance YOKE Causal: t(52) = 14.398, p = 0.000000<br>
-Romance PASV Semantic: t(54) = 20.003, p = 0.000000<br>
-Romance PASV Causal: t(54) = 23.988, p = 0.000000<br>
+Adventure FREE Semantic: mean r = 0.223, t(21) = 5.582, p = 0.000015<br>
+Adventure FREE Causal: mean r = 0.187, t(21) = 4.604, p = 0.000153<br>
+Adventure YOKE Semantic: mean r = 0.323, t(44) = 16.071, p = 0.000000<br>
+Adventure YOKE Causal: mean r = 0.159, t(44) = 5.453, p = 0.000002<br>
+Adventure PASV Semantic: mean r = 0.308, t(48) = 12.681, p = 0.000000<br>
+Adventure PASV Causal: mean r = 0.126, t(48) = 4.922, p = 0.000011<br>
+Romance FREE Semantic: mean r = 0.146, t(17) = 6.109, p = 0.000012<br>
+Romance FREE Causal: mean r = 0.213, t(17) = 8.613, p = 0.000000<br>
+Romance YOKE Semantic: mean r = 0.221, t(52) = 19.021, p = 0.000000<br>
+Romance YOKE Causal: mean r = 0.236, t(52) = 14.398, p = 0.000000<br>
+Romance PASV Semantic: mean r = 0.265, t(54) = 20.003, p = 0.000000<br>
+Romance PASV Causal: mean r = 0.244, t(54) = 23.988, p = 0.000000<br>
 </div>
 <div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):</strong><br>
+Adventure FREE Semantic: mean z = 0.234, t(21) = 5.483, p = 0.000019<br>
+Adventure FREE Causal: mean z = 0.194, t(21) = 4.554, p = 0.000173<br>
+Adventure YOKE Semantic: mean z = 0.342, t(44) = 15.031, p = 0.000000<br>
+Adventure YOKE Causal: mean z = 0.166, t(44) = 5.381, p = 0.000003<br>
+Adventure PASV Semantic: mean z = 0.328, t(48) = 11.968, p = 0.000000<br>
+Adventure PASV Causal: mean z = 0.132, t(48) = 4.854, p = 0.000013<br>
+Romance FREE Semantic: mean z = 0.149, t(17) = 6.062, p = 0.000013<br>
+Romance FREE Causal: mean z = 0.220, t(17) = 8.169, p = 0.000000<br>
+Romance YOKE Semantic: mean z = 0.227, t(52) = 18.431, p = 0.000000<br>
+Romance YOKE Causal: mean z = 0.244, t(52) = 13.866, p = 0.000000<br>
+Romance PASV Semantic: mean z = 0.275, t(54) = 19.035, p = 0.000000<br>
+Romance PASV Causal: mean z = 0.251, t(54) = 23.059, p = 0.000000<br>
 </div>
 
             <p>For both stories, semantic centrality significantly predicted recall, i.e., a significant semantic 
@@ -469,6 +481,9 @@ Romance PASV Causal: t(54) = 23.988, p = 0.000000<br>
 
 <div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Raw values):</strong><br>
 Adventure: F(2.000,113) = 3.036, p = 0.052<br>
+<br><strong>Post-hoc t-tests:</strong><br>
+Adventure Free Vs Yoke: t(65) = -2.503, p = 0.015<br>
+Adventure Free Vs Pasv: t(69) = -1.889, p = 0.063<br>
 Romance: F(2.000,123) = 11.455, p = 0.000027<br>
 <br><strong>Post-hoc t-tests:</strong><br>
 Romance Free Vs Yoke: t(69) = -3.090, p = 0.0029<br>
@@ -477,6 +492,9 @@ Romance Yoke Vs Pasv: t(106) = -2.493, p = 0.014<br>
 </div>
 <div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>
 Adventure: F(2.000,113) = 2.870, p = 0.061<br>
+<br><strong>Post-hoc t-tests:</strong><br>
+Adventure Free Vs Yoke: t(65) = -2.441, p = 0.017<br>
+Adventure Free Vs Pasv: t(69) = -1.888, p = 0.063<br>
 Romance: F(2.000,123) = 11.343, p = 0.000030<br>
 <br><strong>Post-hoc t-tests:</strong><br>
 Romance Free Vs Yoke: t(69) = -3.066, p = 0.0031<br>
@@ -531,20 +549,24 @@ Romance: F(2.000,123) = 3.079, p = 0.050<br>
             vector and the original recall performance vector for each participant (<span class="figure-ref">Figure 4A</span>).</p>
 
 <div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Raw values):</strong><br>
-FREE: t(21.000) = 6.103, p = 0.000005<br>
-YOKE: t(44.000) = 6.193, p = 0.000000<br>
-PASV: t(48.000) = 8.714, p = 0.000000<br>
-FREE: t(17.000) = 7.589, p = 0.000001<br>
-YOKE: t(52.000) = 7.409, p = 0.000000<br>
-PASV: t(54.000) = 6.426, p = 0.000000<br>
+Adventure:<br>
+  FREE: mean r = 0.282, t(21.000) = 6.103, p = 0.000005<br>
+  YOKE: mean r = 0.235, t(44.000) = 6.193, p = 0.000000<br>
+  PASV: mean r = 0.239, t(48.000) = 8.714, p = 0.000000<br>
+Romance:<br>
+  FREE: mean r = 0.352, t(17.000) = 7.589, p = 0.000001<br>
+  YOKE: mean r = 0.186, t(52.000) = 7.409, p = 0.000000<br>
+  PASV: mean r = 0.126, t(54.000) = 6.426, p = 0.000000<br>
 </div>
 <div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Fisher z-transformed):</strong><br>
-FREE: t(21.000) = 5.625, p = 0.000014<br>
-YOKE: t(44.000) = 6.030, p = 0.000000<br>
-PASV: t(48.000) = 8.421, p = 0.000000<br>
-FREE: t(17.000) = 7.216, p = 0.000001<br>
-YOKE: t(52.000) = 7.095, p = 0.000000<br>
-PASV: t(54.000) = 6.306, p = 0.000000<br>
+Adventure:<br>
+  FREE: mean z = 0.310, t(21.000) = 5.625, p = 0.000014<br>
+  YOKE: mean z = 0.259, t(44.000) = 6.030, p = 0.000000<br>
+  PASV: mean z = 0.254, t(48.000) = 8.421, p = 0.000000<br>
+Romance:<br>
+  FREE: mean z = 0.383, t(17.000) = 7.216, p = 0.000001<br>
+  YOKE: mean z = 0.197, t(52.000) = 7.095, p = 0.000000<br>
+  PASV: mean z = 0.130, t(54.000) = 6.306, p = 0.000000<br>
 </div>
 <div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Raw values):</strong><br>
 Adventure: F(2.000,113.000) = 0.368, p = 0.693<br>

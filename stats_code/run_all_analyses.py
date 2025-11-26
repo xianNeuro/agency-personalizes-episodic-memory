@@ -875,26 +875,31 @@ def generate_html_report(stats):
                 story = row.get('Story', '')
                 condition = row.get('Condition', '').upper()
                 measure = row.get('Centrality_Type', '')
+                mean_val = row.get('Mean', '')
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 if pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n):
-                    html.append(f"{story} {condition} {measure}: t({format_stat_value(n-1)}) = "
-                              f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+                    html.append(f"{story} {condition} {measure}: mean r = {format_stat_value(mean_val)}, "
+                              f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                              f"p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):</strong><br>""")
         for row in stats['run5']:
-            if row.get('Analysis') == 'fisher_z' or (row.get('Transform') == 'Fisher z-transformed'):
+            # Check for Fisher z-transformed: 'z' in Analysis column
+            if row.get('Analysis') == 'z' or row.get('Analysis') == 'fisher_z' or (row.get('Transform') == 'Fisher z-transformed'):
                 story = row.get('Story', '')
                 condition = row.get('Condition', '').upper()
                 measure = row.get('Centrality_Type', '')
+                mean_val = row.get('Mean', '')
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 if pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n):
-                    html.append(f"{story} {condition} {measure}: t({format_stat_value(n-1)}) = "
-                              f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+                    html.append(f"{story} {condition} {measure}: mean z = {format_stat_value(mean_val)}, "
+                              f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                              f"p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
     
     html.append("""
@@ -943,8 +948,8 @@ def generate_html_report(stats):
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
                 
-                # Add post-hoc tests if ANOVA is significant (in same box)
-                if pd.notna(p_val) and p_val < 0.05:
+                # Add post-hoc tests if ANOVA p < 0.1 (in same box)
+                if pd.notna(p_val) and p_val < 0.1:
                     posthoc_rows = [r for r in stats['run6'] if 
                                    r.get('Analysis') == 'Post-hoc t-test' and
                                    'Semantic Centrality' in str(r.get('Measure', '')) and
@@ -968,7 +973,8 @@ def generate_html_report(stats):
                             t_stat = posthoc.get('t_statistic', '')
                             p_val_posthoc = posthoc.get('p_value', '')
                             df_posthoc = posthoc.get('df_within', '')
-                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                            # Only show post-hoc tests where p < 0.1
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
                                 html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
                                           f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
@@ -986,8 +992,8 @@ def generate_html_report(stats):
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
                 
-                # Add post-hoc tests if ANOVA is significant (in same box)
-                if pd.notna(p_val) and p_val < 0.05:
+                # Add post-hoc tests if ANOVA p < 0.1 (in same box)
+                if pd.notna(p_val) and p_val < 0.1:
                     posthoc_rows = [r for r in stats['run6'] if 
                                    r.get('Analysis') == 'Post-hoc t-test' and
                                    'Semantic Centrality' in str(r.get('Measure', '')) and
@@ -1011,7 +1017,8 @@ def generate_html_report(stats):
                             t_stat = posthoc.get('t_statistic', '')
                             p_val_posthoc = posthoc.get('p_value', '')
                             df_posthoc = posthoc.get('df_within', '')
-                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                            # Only show post-hoc tests where p < 0.1
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
                                 html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
                                           f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
@@ -1028,6 +1035,33 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA p < 0.1 (in same box)
+                if pd.notna(p_val) and p_val < 0.1:
+                    posthoc_rows = [r for r in stats['run6'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   'Causal Centrality' in str(r.get('Measure', '')) and
+                                   r.get('Transform') == 'Raw values' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            # Extract comparison from Measure column
+                            measure_str = str(posthoc.get('Measure', ''))
+                            if ':' in measure_str:
+                                comparison = measure_str.split(':')[1].strip().replace('_', ' vs ')
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                                comparison = ' '.join(word.capitalize() for word in comparison.split())
+                            else:
+                                comparison = posthoc.get('Condition', '')
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            # Only show post-hoc tests where p < 0.1
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -1042,6 +1076,33 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA p < 0.1 (in same box)
+                if pd.notna(p_val) and p_val < 0.1:
+                    posthoc_rows = [r for r in stats['run6'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   'Causal Centrality' in str(r.get('Measure', '')) and
+                                   r.get('Transform') == 'Fisher z-transformed' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            # Extract comparison from Measure column
+                            measure_str = str(posthoc.get('Measure', ''))
+                            if ':' in measure_str:
+                                comparison = measure_str.split(':')[1].strip().replace('_', ' vs ')
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                                comparison = ' '.join(word.capitalize() for word in comparison.split())
+                            else:
+                                comparison = posthoc.get('Condition', '')
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            # Only show post-hoc tests where p < 0.1
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Raw values):</strong><br>""")
@@ -1106,26 +1167,74 @@ def generate_html_report(stats):
     
     if stats.get('run7'):
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Raw values):</strong><br>""")
-        for row in stats['run7']:
-            if (row.get('Analysis') == 'One-sample t-test' and
-                row.get('Transform') == 'Raw values'):
+        # Group by story first
+        adventure_rows = [r for r in stats['run7'] if 
+                         r.get('Analysis') == 'One-sample t-test' and
+                         r.get('Transform') == 'Raw values' and
+                         r.get('Story', '').lower() == 'adventure']
+        romance_rows = [r for r in stats['run7'] if 
+                       r.get('Analysis') == 'One-sample t-test' and
+                       r.get('Transform') == 'Raw values' and
+                       r.get('Story', '').lower() == 'romance']
+        
+        if adventure_rows:
+            html.append("Adventure:<br>")
+            for row in adventure_rows:
                 condition = row.get('Condition', '').upper()
+                mean_val = row.get('Mean', '')
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
-                html.append(f"{condition}: t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}, "
+                          f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+        
+        if romance_rows:
+            html.append("Romance:<br>")
+            for row in romance_rows:
+                condition = row.get('Condition', '').upper()
+                mean_val = row.get('Mean', '')
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}, "
+                          f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
                           f"p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Fisher z-transformed):</strong><br>""")
-        for row in stats['run7']:
-            if (row.get('Analysis') == 'One-sample t-test' and
-                row.get('Transform') == 'Fisher z-transformed'):
+        # Group by story first
+        adventure_rows = [r for r in stats['run7'] if 
+                         r.get('Analysis') == 'One-sample t-test' and
+                         r.get('Transform') == 'Fisher z-transformed' and
+                         r.get('Story', '').lower() == 'adventure']
+        romance_rows = [r for r in stats['run7'] if 
+                       r.get('Analysis') == 'One-sample t-test' and
+                       r.get('Transform') == 'Fisher z-transformed' and
+                       r.get('Story', '').lower() == 'romance']
+        
+        if adventure_rows:
+            html.append("Adventure:<br>")
+            for row in adventure_rows:
                 condition = row.get('Condition', '').upper()
+                mean_val = row.get('Mean', '')
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
-                html.append(f"{condition}: t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                html.append(f"  {condition}: mean z = {format_stat_value(mean_val)}, "
+                          f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+        
+        if romance_rows:
+            html.append("Romance:<br>")
+            for row in romance_rows:
+                condition = row.get('Condition', '').upper()
+                mean_val = row.get('Mean', '')
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                html.append(f"  {condition}: mean z = {format_stat_value(mean_val)}, "
+                          f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
                           f"p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
         
