@@ -21,12 +21,12 @@ Free condition:
 
 Yoked condition (matching Choice ISC constraint):
   Valid samples: 10000/10000
-  Choice ISC: Mean = 0.1875, Std = 0.0159
-  Recall ISC: Mean = 0.2123, Std = 0.0204
+  Choice ISC: Mean = 0.1874, Std = 0.0159
+  Recall ISC: Mean = 0.2124, Std = 0.0204
 
 Statistical test:
   One-tailed test: p = 0.000000 (proportion of Yoked samples below Free Recall ISC)
-  One-sample t-test: t(9999) = 372.2638, p = 0.000000
+  One-sample t-test: t(9999) = 372.4362, p = 0.000000
   Result: Free Recall ISC significantly lower than Yoked (p < 0.001)
 
 ================================================================================

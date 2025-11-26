@@ -332,3 +332,698 @@ For questions about the code or analyses, please contact the corresponding autho
 
 [Specify license if applicable]
 
+---
+
+## Full Statistical Analysis Report
+
+Below is the complete comprehensive statistical analysis report containing all results from analyses run1 through run13, including both raw and Fisher z-transformed statistics. This report reproduces the manuscript results section with full statistical details.
+
+**Note**: The report is displayed below for easy viewing. You can also find the standalone HTML file at `output/comprehensive_report/comprehensive_analysis_report.html`.
+
+<details open>
+<summary><strong>Comprehensive Analysis Report (Click to collapse/expand)</strong></summary>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Comprehensive Analysis Report: Agency Effects on Memory</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.8;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #ffffff;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 4px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #95a5a6;
+            padding-bottom: 8px;
+            font-size: 1.5em;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 25px;
+            font-size: 1.2em;
+        }
+        .run-section {
+            margin: 40px 0;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #3498db;
+            border-radius: 5px;
+        }
+        .stats-box {
+            background-color: #e8f4f8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #bdc3c7;
+        }
+        .manuscript-text {
+            text-align: justify;
+            margin: 20px 0;
+            font-size: 1.05em;
+        }
+        .stat-inline {
+            font-weight: bold;
+            color: #2980b9;
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .figure-ref {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        .supplement-ref {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive Analysis Report: Agency Effects on Memory</h1>
+    <p><em>Generated: 2025-11-26 15:51:32</em></p>
+    <p><em>This report contains the manuscript main results section with full statistics inserted from analyses run1 through run13.</em></p>
+
+
+    <div class="run-section">
+        <h2>RUN 1: Agency did not improve recall performance</h2>
+        <div class="manuscript-text">
+            <p>For each participant, events were binned according to whether they were remembered or forgotten. 
+            Independent raters compared each sentence of recall to the story path read by the participant; 
+            if any part of a given event was mentioned in any recall sentence, it was counted as remembered.</p>
+
+<div class="stats-box"><strong>Statistical Results:</strong><br>
+Adventure: F(2,113) = 1.433, p = 0.243<br>
+Romance: F(2,123) = 0.671, p = 0.513<br>
+</div>
+
+            <p>There were no significant differences in recall performance across conditions in either story 
+            (<span class="stat-inline">Adventure: F(2,113)=1.43, p=0.243</span>; 
+            <span class="stat-inline">Romance: F(2,123)=0.67, p=0.513</span>; 
+            <span class="figure-ref">Supplementary Figure S3</span>). The Romance story additionally recorded 
+            individual reading speed and showed no difference across the three agency conditions (ps> .3; 
+            see <span class="supplement-ref">Supplement S3</span> for details). See <span class="supplement-ref">Supplement S4</span> 
+            for details about memory for choice and non-choice events; See <span class="supplement-ref">Supplement S5</span> 
+            for details about recognition memory performance; See <span class="supplement-ref">Supplement S6</span> 
+            for details about memory for denied and granted choice events.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 2: Individual variability in recalled events</h2>
+        <div class="manuscript-text">
+            <p><strong>Agency magnified individual variability in recall and choice.</strong> The Romance story, 
+            by design, had half of its events shared across all participants ("shared story sections"), 
+            regardless of condition (<span class="figure-ref">Figure 1A</span>). While participants made many 
+            choices during these shared story sections, unbeknownst to them, all choice options led to the 
+            same subsequent events. This allowed us to examine inter-participant variability in terms of 
+            memory (which events were recalled) and choice behavior (which options were selected) when all 
+            events were perfectly matched across participants, i.e., all participants read these events, 
+            and the events were composed of identical text.</p>
+            
+            <p><strong>Individual variability in recalled events.</strong> A recall score (0 = Forgotten, 1 = Recalled; 
+            see Methods for details) for each of the 64 events in the shared story sections was extracted for each 
+            participant, composing a vector of recall performance (<span class="figure-ref">Figure 2A</span>). 
+            To assess the memory similarity across participants, we computed the inter-participant correlation (ISC), 
+            i.e., the Pearson correlation between each pair of participants' recall performance vectors, i.e., 
+            "Recall ISC".</p>
+
+<div class="stats-box"><strong>64 Shared Events - One-sample t-tests (Raw values):</strong><br>
+FREE: mean r = 0.136, t(152) = 11.746, p = 0.000000<br>
+YOKE: mean r = 0.226, t(1377) = 58.288, p = 0.000000<br>
+PASV: mean r = 0.249, t(1484) = 70.871, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>64 Shared Events - ANOVA (Raw values):</strong><br>
+F(2,3013) = 48.127, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>49 Non-Choice Events - One-sample t-tests (Raw values):</strong><br>
+FREE: mean r = 0.157, t(152) = 13.212, p = 0.000000<br>
+YOKE: mean r = 0.219, t(1377) = 51.429, p = 0.000000<br>
+PASV: mean r = 0.229, t(1484) = 59.028, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>49 Non-Choice Events - ANOVA (Raw values):</strong><br>
+F(2,3013) = 15.445, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>64 Shared Events - One-sample t-tests (Fisher z-transformed):</strong><br>
+FREE: mean z = 0.140, t(152) = 11.672, p = 0.000000<br>
+YOKE: mean z = 0.235, t(1377) = 55.827, p = 0.000000<br>
+PASV: mean z = 0.260, t(1484) = 67.258, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>64 Shared Events - ANOVA (Fisher z-transformed):</strong><br>
+F(2,3013) = 45.955, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>49 Non-Choice Events - One-sample t-tests (Fisher z-transformed):</strong><br>
+FREE: mean z = 0.161, t(152) = 13.077, p = 0.000000<br>
+YOKE: mean z = 0.229, t(1377) = 49.029, p = 0.000000<br>
+PASV: mean z = 0.239, t(1484) = 55.878, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>49 Non-Choice Events - ANOVA (Fisher z-transformed):</strong><br>
+F(2,3013) = 14.975, p = 0.000000<br>
+</div>
+
+            <p>While events differed in their overall memorability, Recall ISC was significantly above zero 
+            in all three conditions (<span class="stat-inline">Romance: Free: mean r = 0.136, p < 0.001</span>; 
+            <span class="stat-inline">Yoked: mean r = 0.226, p < 0.001</span>; 
+            <span class="stat-inline">Passive: mean r = 0.249, p < 0.001</span>; one-sample t-tests against zero), 
+            indicating that individuals tended to remember events more similarly to one another than would be 
+            expected by chance.</p>
+            
+            <p>Interestingly, when comparing across the conditions, Free participants had reduced Recall ISC 
+            relative to Yoked and Passive participants, indicating that agency induced greater individual variability 
+            in terms of which events were recalled (<span class="figure-ref">Figure 2B, left</span>; 
+            <span class="stat-inline">Romance: F(2,3013) = 48.1, p < .001</span>; post-hoc tests: 
+            <span class="stat-inline">Free vs. Passive: p < 0.001</span>; 
+            <span class="stat-inline">Free vs. Yoked: p < 0.001</span>).</p>
+            
+            <p>Out of the 64 events, 15 were "choice events" (the event that the participant chose to occur, 
+            e.g., "Sleep beneath the bridge" in <span class="figure-ref">Figure 1B</span>). To examine whether 
+            the reduced Recall ISC observed among Free participants was driven by these choice events, we repeated 
+            the analysis using only the 49 non-choice events. The results were largely unchanged: Recall ISC was 
+            still significantly above zero in all three conditions (<span class="stat-inline">Romance: Free: mean r = 0.157, p < 0.001</span>; 
+            <span class="stat-inline">Yoked: mean r = 0.219, p < 0.001</span>; 
+            <span class="stat-inline">Passive: mean r = 0.229, p < 0.001</span>; one-sample t-tests against zero), 
+            and the Free condition continued to show reduced Recall ISC relative to the Yoked and Passive conditions 
+            (<span class="figure-ref">Figure 2C, left</span>; <span class="stat-inline">Romance: F(2,3013) = 15.4, p < 0.001</span>; 
+            post-hoc tests: <span class="stat-inline">Free vs. Passive: p < 0.001</span>; 
+            <span class="stat-inline">Free vs. Yoked: p < 0.001</span>).</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 12: Permutation test for Recall ISC</h2>
+        <div class="manuscript-text">
+            <p>In the Yoked and Passive conditions, multiple participants followed the story-path corresponding 
+            to each of the 18 unique Free participant story-paths. To ensure that the above-reported higher 
+            inter-participant memory similarity in the Yoked and Passive conditions was not due to participants 
+            sharing the same story-path, we conducted non-parametric tests of Recall ISC 
+            (<span class="figure-ref">Figure 2B-C</span>). We randomly sampled one Yoked and one Passive participant 
+            from each of the 18 story-paths to form a sample of 18 Yoked and 18 Passive participants; thus, no pairs 
+            within these samples read the same story-path. This process was repeated 10,000 times to generate 
+            distributions of Recall ISC for both the Yoked and Passive conditions.</p>
+
+<div class="stats-box"><pre>================================================================================
+PERMUTATION TEST FOR RECALL ISC
+================================================================================
+
+Method: Non-parametric permutation test
+  - Randomly sampled 1 Yoked and 1 Passive participant from each of 18 story-paths
+  - Repeated 10,000 times to generate distributions
+  - Compared Free condition's Recall ISC to these distributions
+
+Random seed: 42 (for reproducibility)
+
+================================================================================
+ANALYSIS: 64 Shared Events
+================================================================================
+
+Free condition mean ISC: 0.1364
+
+Permutation distributions:
+  Yoked: Mean = 0.2183, Std = 0.0201, N = 10000
+  Passive: Mean = 0.2530, Std = 0.0180, N = 10000
+
+Statistical tests:
+  Free vs Yoked: p = 0.000000 (proportion of Yoked samples below Free mean)
+    Result: Free ISC significantly lower than Yoked (p < 0.001)
+
+  Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
+    Result: Free ISC significantly lower than Passive (p < 0.001)
+
+  Yoked vs Passive: t = -128.6124, p = 0.000000
+    Result: Significant difference (p < 0.001)
+
+================================================================================
+ANALYSIS: 49 Non-Choice Events
+================================================================================
+
+Free condition mean ISC: 0.1568
+
+Permutation distributions:
+  Yoked: Mean = 0.2073, Std = 0.0212, N = 10000
+  Passive: Mean = 0.2325, Std = 0.0193, N = 10000
+
+Statistical tests:
+  Free vs Yoked: p = 0.007000 (proportion of Yoked samples below Free mean)
+    Result: Free ISC significantly lower than Yoked (p < 0.01)
+
+  Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
+    Result: Free ISC significantly lower than Passive (p < 0.001)
+
+  Yoked vs Passive: t = -87.8923, p = 0.000000
+    Result: Significant difference (p < 0.001)
+</pre></div>
+
+            <p>The analysis confirmed that the Free condition's Recall ISC was significantly lower than that of 
+            the Passive (<span class="stat-inline">p < 0.001</span>; excluding choice events, 
+            <span class="stat-inline">p < 0.001</span>) and the Yoked 
+            (<span class="stat-inline">p < 0.001</span>; excluding choice events, 
+            <span class="stat-inline">p = 0.006</span>) conditions 
+            (<span class="figure-ref">Figure 2B-C, right</span>).</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 3: Individual variability in choices made</h2>
+        <div class="manuscript-text">
+            <p>The option that was selected (1 or 2) at each of the 15 choice-points in the shared story sections 
+            was extracted for each Free and Yoked participant (Passive participants made no choices), composing a 
+            vector of choice selections. To assess the choice similarity across participants, we computed the 
+            inter-participant (Pearson) correlation between each pair of participants' choice selection vectors, 
+            i.e., "Choice ISC".</p>
+
+<div class="stats-box"><strong>Choice ISC Results (Raw values):</strong><br>
+FREE: mean r = 0.208, t(152) = 9.548, p = 0.000000<br>
+YOKE: mean r = 0.255, t(1377) = 36.193, p = 0.000000<br>
+Free vs Yoked: t = -2.105, p = 0.035<br>
+</div>
+<div class="stats-box"><strong>Choice ISC Results (Fisher z-transformed):</strong><br>
+FREE: mean z = 0.233, t(152) = 9.133, p = 0.000000<br>
+YOKE: mean z = 0.289, t(1377) = 31.175, p = 0.000000<br>
+Free vs Yoked: t = -1.934, p = 0.053<br>
+</div>
+
+            <p>Within-group Choice ISC was significantly above zero in both conditions (ps < 0.001), showing that 
+            certain choice options were intrinsically preferred over others. Comparing across conditions, Free 
+            participants had significantly reduced Choice ISC (<span class="stat-inline">mean r = 0.208</span>) 
+            compared to Yoked participants (<span class="stat-inline">mean r = 0.255</span>), indicating that 
+            agency (full as opposed to partial) induced greater individual variability in terms of which options 
+            were selected (<span class="stat-inline">p = 0.035</span>, two-sample t-test).</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 13: Permutation test with matching Choice ISC</h2>
+        <div class="manuscript-text">
+            <p>This increased Choice ISC within the Free condition did not drive their increased Recall ISC. 
+            Another permutation test showed that Free participants still had significantly reduced within-group 
+            Recall ISC compared to their Yoked counterparts with matching Choice ISC 
+            (<span class="stat-inline">p < 0.001</span>); see <span class="supplement-ref">Supplement S12</span>.</p>
+
+<div class="stats-box"><pre>================================================================================
+PERMUTATION TEST FOR RECALL ISC WITH MATCHING CHOICE ISC
+================================================================================
+
+Method: Non-parametric permutation test with Choice ISC constraint
+  - Randomly sampled 1 Yoked participant from each of 18 story-paths
+  - Only kept samples where Yoked Choice ISC <= Free Choice ISC
+  - Repeated until 10,000 valid samples obtained
+  - Computed Recall ISC for each valid sample
+  - Compared Free condition's Recall ISC to Yoked distribution
+
+Random seed: 42 (for reproducibility)
+
+================================================================================
+ANALYSIS: 64 Shared Events
+================================================================================
+
+Free condition:
+  Choice ISC: 0.2077
+  Recall ISC: 0.1364
+
+Yoked condition (matching Choice ISC constraint):
+  Valid samples: 10000/10000
+  Choice ISC: Mean = 0.1874, Std = 0.0159
+  Recall ISC: Mean = 0.2124, Std = 0.0204
+
+Statistical test:
+  One-tailed test: p = 0.000000 (proportion of Yoked samples below Free Recall ISC)
+  One-sample t-test: t(9999) = 372.4362, p = 0.000000
+  Result: Free Recall ISC significantly lower than Yoked (p < 0.001)
+
+================================================================================
+ANALYSIS: 49 Non-Choice Events
+================================================================================
+
+Free condition:
+  Choice ISC: 0.2077
+  Recall ISC: 0.1568
+
+Yoked condition (matching Choice ISC constraint):
+  Valid samples: 10000/10000
+  Choice ISC: Mean = 0.1875, Std = 0.0159
+  Recall ISC: Mean = 0.2012, Std = 0.0221
+
+Statistical test:
+  One-tailed test: p = 0.015400 (proportion of Yoked samples below Free Recall ISC)
+  One-sample t-test: t(9999) = 200.5760, p = 0.000000
+  Result: Free Recall ISC significantly lower than Yoked (p < 0.05)
+</pre></div>
+
+            <p>These results suggest that agency was the driver of greater individual variability in both memory 
+            and choice behaviors.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 4: Divergence from the group</h2>
+        <div class="manuscript-text">
+            <p>Each Free participant's memory divergence score was calculated as one minus the Pearson correlation 
+            between their recall performance vector and the group averaged recall performance vector. In other words, 
+            the more different their memory performance vector was from the group average, the higher their memory 
+            divergence score. Similarly, we calculated each Free participant's choice divergence score as one minus 
+            the Pearson correlation between their choice selection vector and the group averaged choice selection 
+            vector.</p>
+
+<div class="stats-box"><strong>Memory Divergence vs Choice Divergence Correlation:</strong><br>
+free18: r(16) = 0.405, p = 0.095<br>
+free100: r(98) = 0.296, p = 0.0028<br>
+</div>
+
+            <p>Memory divergence and choice divergence were correlated with each other 
+            (<span class="stat-inline">Romance: r(16) = .405, p = .095</span>; 
+            <span class="stat-inline">r(98) = .296, p = .003</span>). In other words, the more idiosyncratic 
+            their memory for shared events, the more idiosyncratic their choices.</p>
+            
+            <p>Overall, these results support the idea that agency magnified individual variability in, i.e., 
+            personalized, both memory and choice behaviors. This effect was observed while all events were 
+            held constant across conditions.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 5: Event recall was predicted by semantic and causal centrality</h2>
+        <div class="manuscript-text">
+            <p>Narrative networks were computed for each unique story path following the methods of Lee & Chen. 
+            For semantic narrative network analysis, each event was converted into an embedding vector using the 
+            Universal Sentence Encoder (USE). Semantic centrality, a measure of how strongly interconnected a 
+            given event was with other events in the narrative via shared meaning, was calculated for each event 
+            by averaging its embedding cosine similarity with all other events in the story path. The effect of 
+            semantic centrality (semantic influence) on memory was computed as the Pearson correlation between 
+            semantic centrality and recall (an event-by-event vector of remembered=1, forgotten=0) for each participant.</p>
+
+<div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Raw values):</strong><br>
+Adventure FREE Semantic: t(21) = 5.582, p = 0.000015<br>
+Adventure FREE Causal: t(21) = 4.604, p = 0.000153<br>
+Adventure YOKE Semantic: t(44) = 16.071, p = 0.000000<br>
+Adventure YOKE Causal: t(44) = 5.453, p = 0.000002<br>
+Adventure PASV Semantic: t(48) = 12.681, p = 0.000000<br>
+Adventure PASV Causal: t(48) = 4.922, p = 0.000011<br>
+Romance FREE Semantic: t(17) = 6.109, p = 0.000012<br>
+Romance FREE Causal: t(17) = 8.613, p = 0.000000<br>
+Romance YOKE Semantic: t(52) = 19.021, p = 0.000000<br>
+Romance YOKE Causal: t(52) = 14.398, p = 0.000000<br>
+Romance PASV Semantic: t(54) = 20.003, p = 0.000000<br>
+Romance PASV Causal: t(54) = 23.988, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):</strong><br>
+</div>
+
+            <p>For both stories, semantic centrality significantly predicted recall, i.e., a significant semantic 
+            influence on memory was observed, in all three conditions (ps < 0.001, one-sample t-tests against zero; 
+            <span class="supplement-ref">Supplement S8</span> and <span class="figure-ref">Supplementary Figure S8-2</span>).</p>
+            
+            <p>For causal narrative network analysis, independent human raters judged which pairs of events were 
+            causally linked in a given story path (Adventure: 1 rater per path; Romance: average of 3 raters per path; 
+            see Methods). Causal centrality, a measure of an event's causal connectedness to other events within a 
+            narrative, was calculated for each event by averaging across its causal connections with all other events 
+            in the story path. The effect of causal centrality (causal influence) on memory was computed as the Pearson 
+            correlation between causal centrality and event-by-event recall for each participant.</p>
+            
+            <p>For both stories, causal centrality significantly predicted recall, i.e., a significant causal 
+            influence on memory was observed, in all three conditions (ps < 0.001, one-sample t-tests against zero; 
+            <span class="supplement-ref">Supplement S8</span> and <span class="figure-ref">Supplementary Figure S8-2</span>).</p>
+            
+            <p>In sum, both semantic centrality and causal centrality predicted recall of interactive narratives, 
+            echoing the findings of earlier studies on the effects of semantic and causal relations on memory for narratives.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 6: Agency reduced the influence of semantic but not causal centrality on recall</h2>
+        <div class="manuscript-text">
+            <p>We next compared the strength of semantic and causal influences on memory across the three conditions 
+            (Free, Yoked, Passive). Importantly, because Yoked and Passive participants read the story paths generated 
+            by Free participants, event content was matched across conditions; only the degree of perceived agency varied.</p>
+
+<div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Raw values):</strong><br>
+Adventure: F(2.000,113) = 3.036, p = 0.052<br>
+Romance: F(2.000,123) = 11.455, p = 0.000027<br>
+</div>
+<div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>
+Adventure: F(2.000,113) = 2.870, p = 0.061<br>
+Romance: F(2.000,123) = 11.343, p = 0.000030<br>
+</div>
+<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Raw values):</strong><br>
+Adventure: F(2.000,113) = 0.864, p = 0.424<br>
+Romance: F(2.000,123) = 0.638, p = 0.530<br>
+</div>
+<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>
+Adventure: F(2.000,113) = 0.809, p = 0.448<br>
+Romance: F(2.000,123) = 0.562, p = 0.572<br>
+</div>
+<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Raw values):</strong><br>
+Adventure: F(2.000,113) = 3.272, p = 0.042<br>
+Romance: F(2.000,123) = 2.990, p = 0.054<br>
+</div>
+<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Fisher z-transformed):</strong><br>
+Adventure: F(2.000,113) = 3.175, p = 0.046<br>
+Romance: F(2.000,123) = 3.079, p = 0.050<br>
+</div>
+
+            <p>For both stories, we observed significant differences across conditions, wherein Free had lower 
+            semantic influence on memory compared to Yoked and Passive 
+            (<span class="stat-inline">Adventure: F(2,113) = 3.04, p = 0.052</span>; 
+            <span class="stat-inline">Romance: F(2,123) = 11.46, p < .001</span>; 
+            <span class="figure-ref">Figure 3A</span>). In contrast, causal influence on memory was not different 
+            between conditions (<span class="figure-ref">Figure 3B</span>). There was a significant network type 
+            x agency interaction for the Adventure story (<span class="stat-inline">F(2,113) = 3.27, p = .042</span>) 
+            and a trend for the same for the Romance story (<span class="stat-inline">F(2,123) = 2.99, p = .054</span>).</p>
+            
+            <p>These results show that when participants had agentive control over the plot of a narrative, semantic 
+            influence (the impact of semantic centrality) on later memory was reduced; meanwhile, causal influence 
+            (the impact of the causal centrality) on recall was relatively unaffected. This weakening of semantic 
+            influence suggests that Free participants' semantic space may have shifted away from the generic (normative) 
+            semantic space captured by generic text embeddings. In contrast, causal influence was unchanged by agency.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 7: Agency introduces temporal dependencies in memory</h2>
+        <div class="manuscript-text">
+            <p>We examined whether recall performance for a given event could be predicted by whether its temporally 
+            neighboring events at encoding were recalled, which we term the "neighbor encoding effect". First, for 
+            each participant and for each event, we calculated the average of the recall scores for the immediately 
+            previous and next events at encoding (the neighbors); for the first and last event, there were neighbors 
+            on only one side, and thus these entries consisted merely of recall performance for the next and previous 
+            event, respectively. This procedure generated a vector of neighbor recall performance for each participant. 
+            We then calculated the neighbor encoding effect as the correlation between the neighbor recall performance 
+            vector and the original recall performance vector for each participant (<span class="figure-ref">Figure 4A</span>).</p>
+
+<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Raw values):</strong><br>
+FREE: t(21.000) = 6.103, p = 0.000005<br>
+YOKE: t(44.000) = 6.193, p = 0.000000<br>
+PASV: t(48.000) = 8.714, p = 0.000000<br>
+FREE: t(17.000) = 7.589, p = 0.000001<br>
+YOKE: t(52.000) = 7.409, p = 0.000000<br>
+PASV: t(54.000) = 6.426, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Fisher z-transformed):</strong><br>
+FREE: t(21.000) = 5.625, p = 0.000014<br>
+YOKE: t(44.000) = 6.030, p = 0.000000<br>
+PASV: t(48.000) = 8.421, p = 0.000000<br>
+FREE: t(17.000) = 7.216, p = 0.000001<br>
+YOKE: t(52.000) = 7.095, p = 0.000000<br>
+PASV: t(54.000) = 6.306, p = 0.000000<br>
+</div>
+<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Raw values):</strong><br>
+Adventure: F(2.000,113.000) = 0.368, p = 0.693<br>
+Romance: F(2.000,123.000) = 12.073, p = 0.000016<br>
+</div>
+<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Fisher z-transformed):</strong><br>
+Adventure: F(2.000,113.000) = 0.400, p = 0.671<br>
+Romance: F(2.000,123.000) = 12.556, p = 0.000011<br>
+</div>
+
+            <p>The neighbor encoding effect was positive in all three conditions for both stories 
+            (Adventure and Romance, ps < 0.001), and significantly different across the three conditions 
+            in the Romance story, with Free having a higher neighbor encoding effect compared to Yoked and 
+            Passive (<span class="stat-inline">F(2,123) = 12.07, p < 0.001</span>; post-hoc tests: 
+            <span class="stat-inline">Free vs. Yoked, p = 0.002</span>; 
+            <span class="stat-inline">Free vs. Passive, p < 0.001</span>; 
+            <span class="figure-ref">Figure 4B</span>). Note that despite having the same trend, the 
+            Adventure story did not show a statistically significant agency enhancement. This is because the 
+            Passive participants reached a ceiling for the neighbor encoding effect due to limited and vastly 
+            varying story length (Adventure vs. Romance: 22-59 events vs. 128-135 events). However, additional 
+            analysis confirmed that agency can enhance neighbor encoding effect in longer Adventure stories, 
+            supporting the result for the Romance story; see <span class="supplement-ref">Supplement S13</span>.</p>
+            
+            <p>Overall, these results suggest that agency enhanced the tendency for temporally neighboring events 
+            at encoding to share the same subsequent memory status, either both recalled or both forgotten.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 8: Temporal violation rate</h2>
+        <div class="manuscript-text">
+            <p>The neighbor encoding effect is distinct from the "temporal contiguity effect", which describes 
+            the phenomenon that recalling one item from a randomized list tends to trigger the recall of items 
+            which were experienced nearby in time; the neighbor encoding effect does not incorporate any information 
+            about the temporal order of recall. To examine temporal order effects during recall in our data, we 
+            calculated the temporal violation rate as the frequency with which each participant recalled events out 
+            of order.</p>
+
+<div class="stats-box"><strong>Temporal Violation Rate - One-way ANOVA:</strong><br>
+Adventure: F(2,113) = 2.564, p = 0.081<br>
+Romance: F(2,123) = 0.096, p = 0.908<br>
+</div>
+
+            <p>For each participant, recall was divided into segments (brief sentences). We counted the number of 
+            times that a recall segment referred to an event that occurred earlier in the story than the events 
+            referred to by the previous recall segment; this was then divided by the participant's total number of 
+            recall segments. There was no significant difference in temporal violation rate across conditions in 
+            either story (<span class="stat-inline">Adventure: F(2,113) = 2.56, p = .081</span>; 
+            <span class="stat-inline">Romance: F(2,123) = 0.10, p = .913</span>). In general, temporal order was 
+            remarkably well-preserved, with low temporal violation rates in all conditions 
+            (<span class="figure-ref">Figure 4C-D</span>).</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 9: Greater memory divergence was associated with weaker semantic influence</h2>
+        <div class="manuscript-text">
+            <p>We next examined how memory divergence scores (<span class="figure-ref">Figure 2</span>) were related 
+            to a) the impact of semantic centrality on recall (<span class="figure-ref">Figure 3</span>) and b) the 
+            neighbor encoding effect (<span class="figure-ref">Figure 4</span>). Each Free participant's semantic 
+            influence score was obtained by calculating the Pearson correlation between semantic centrality and memory 
+            performance (same as shown in <span class="figure-ref">Figure 3</span>).</p>
+            
+            <p>Memory divergence was negatively correlated with semantic influence scores in Free participants. In other 
+            words, the more a participant's recall deviated from other participants in the group, the weaker the effect 
+            of semantic centrality on their recall.</p>
+
+<div class="stats-box"><strong>Memory Divergence vs Semantic Influence:</strong><br>
+N=18: r(16) = -0.519, p = 0.027<br>
+N=100: r(98) = -0.460, p = 0.000001<br>
+</div>
+
+            <p>This was true when including only the 18 Free participants who had yoked counterparts 
+            (<span class="stat-inline">Romance: r(16) = -.519, p = 0.027</span>) as well as when using the full sample 
+            (<span class="stat-inline">Romance: r(98) = -.460, p < 0.001</span>; 
+            <span class="supplement-ref">Supplement S10</span> and <span class="figure-ref">Supplementary Figure S10A</span>). 
+            Choice divergence, however, was not significantly correlated with semantic network scores. Note that these 
+            comparisons could only be made for the Romance story, as the analyses of divergence depend on the shared 
+            story sections.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 10: Neighbor encoding effect correlations</h2>
+        <div class="manuscript-text">
+            <p>The neighbor encoding effect was also positively associated with memory divergence in Free participants 
+            (<span class="stat-inline">Romance: r(16) = 0.496, p = .036</span>; 
+            <span class="stat-inline">r(98)= 0.304, p = .002</span>; 
+            <span class="figure-ref">Supplementary Figure S10B</span>). In other words, the more a participant's 
+            recall deviated from other participants in the group, the more that participant's neighboring events tended 
+            to have the same recall status (remembered or forgotten).</p>
+
+<div class="stats-box"><strong>Neighbor Encoding Effect Correlations:</strong><br>
+Adventure (N=22): Neighbor Encoding Effect vs Semantic Influence: r(20) = -0.348, p = 0.113<br>
+Romance (N=18): Neighbor Encoding Effect vs Memory Divergence: r(16) = 0.496, p = 0.036<br>
+Romance (N=18): Neighbor Encoding Effect vs Semantic Influence: r(16) = -0.324, p = 0.189<br>
+Romance (N=100): Neighbor Encoding Effect vs Memory Divergence: r(98) = 0.304, p = 0.0021<br>
+Romance (N=100): Neighbor Encoding Effect vs Semantic Influence: r(98) = -0.347, p = 0.000402<br>
+</div>
+<div class="stats-box"><strong>Multiple Linear Regression (Romance, N=100):</strong><br>
+Neighbor Encoding Effect: p = 0.087<br>
+Semantic Influence: p = 0.000047<br>
+</div>
+
+            <p>The neighbor encoding effect was negatively correlated with semantic influence scores in Free participants, 
+            across both stories (<span class="stat-inline">Adventure: r(22) = -.348, p = .113</span>. 
+            <span class="stat-inline">Romance: r(16) = -.324, p = .189</span>; 
+            <span class="stat-inline">r(98)= -.347, p < .001</span>; 
+            <span class="figure-ref">Supplementary Figure S10C</span>). However, when including both semantic influence 
+            and the neighbor encoding scores in a multiple linear regression predicting memory divergence, semantic influence 
+            score was a significant predictor (<span class="stat-inline">p < 0.001</span>) while the neighbor encoding effect 
+            only showed a trend (<span class="stat-inline">p = 0.087</span>).</p>
+            
+            <p>Overall, the degree to which a participant's memory was idiosyncratic in terms of which events they recalled 
+            (memory divergence) was negatively correlated with impact of the story's semantic network on memory – in line with 
+            the idea that agency personalizes memory.</p>
+        </div>
+    </div>
+
+
+    <div class="run-section">
+        <h2>RUN 11: Consequences of having your choices denied</h2>
+        <div class="manuscript-text">
+            <p>In the results reported above, Yoked subjects generally exhibited similar memory performance to the Passive 
+            subjects—similar idiosyncrasy in event recall, in semantic and causal centrality effect on memory, and in neighbor 
+            encoding effects, with their group mean falling in between that of the Free and Passive condition. Given that the 
+            Yoked condition had a varied amount of choice granted/denied (see <span class="figure-ref">Supplementary Figure S6-1</span>), 
+            these results aligned with the design of 'partial agency' for the Yoked condition in a gradient of agency.</p>
+            
+            <p>Nonetheless, having one's agency denied can have unique memory effects at local choice events: one's memory for 
+            the denied choice events is selectively reduced compared to its choice-granted counterparts in the Free condition</p>
+
+<div class="stats-box"><strong>Agency Denial Effect - Two-sample t-test:</strong><br>
+Adventure: p = 0.015<br>
+Romance: p = 0.017<br>
+</div>
+
+            (<span class="stat-inline">Adventure: p = 0.015</span>; 
+            <span class="stat-inline">Romance: p = 0.017</span>, two-sample t-test); individual differences contribute 
+            to a variation of tendency to selective recall or forget the denied choice events (see 
+            <span class="supplement-ref">Supplement S6</span> for details).</p>
+            
+            <p>The percentage of choices granted in the Yoked participants was not predictive of individual's recall performance, 
+            recall similarity to their Free and Passive condition counterparts, semantic and causal centrality effects on memory, 
+            nor their neighbor encoding effects (all ps>.3); however, higher percentage of choices granted predicted greater 
+            individual tendency to forget the choice-denied events (Adventure: r(44) = .335, p = .026. Romance: r(51) = .137, 
+            p = .337; see <span class="supplement-ref">Supplement S7</span> for details).</p>
+            
+            <p>Together, these results suggest that in a context lacking full agentive control, perceived agency and their 
+            effects on memory could vary across individuals in non-systematic ways. The one exception is that with more control 
+            in such agency-uncertain contexts, the more one has reduced recall for the agency-denied events.</p>
+        </div>
+    </div>
+
+
+    </body>
+</html>
+
+</details>

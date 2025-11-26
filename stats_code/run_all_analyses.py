@@ -466,6 +466,80 @@ def generate_html_report(stats):
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
+        
+        # Get analysis 3 (64 shared events, Fisher z-transformed)
+        analysis3 = [r for r in stats['run2'] if r.get('analysis') == 3]
+        if analysis3:
+            html.append("""<div class="stats-box"><strong>64 Shared Events - One-sample t-tests (Fisher z-transformed):</strong><br>""")
+            for row in analysis3:
+                condition = row.get('condition', '').upper()
+                mean_r = row.get('mean', '')
+                t_stat = row.get('t_stat', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                df_val = row.get('df', n-1 if pd.notna(n) else '')
+                html.append(f"{condition}: mean z = {format_stat_value(mean_r)}, "
+                          f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+            html.append("</div>")
+        
+        # Get ANOVA for analysis 3
+        try:
+            run2_anova_file = os.path.join(loader.get_output_dir("run2_individual_variability_recalled_events"),
+                                         "isc_anova_results_all_analyses.xlsx")
+            if os.path.exists(run2_anova_file):
+                anova_df = pd.read_excel(run2_anova_file)
+                anova3 = anova_df[anova_df['analysis'] == 3]
+                if not anova3.empty:
+                    html.append("""<div class="stats-box"><strong>64 Shared Events - ANOVA (Fisher z-transformed):</strong><br>""")
+                    for _, row in anova3.iterrows():
+                        f_stat = row.get('f_stat', row.get('F_statistic', row.get('F', '')))
+                        df_between = row.get('df_between', row.get('df1', ''))
+                        df_within = row.get('df_within', row.get('df2', ''))
+                        p_val = row.get('p_value', row.get('PR(>F)', ''))
+                        if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    html.append("</div>")
+        except Exception as e:
+            print(f"Error loading run2 ANOVA: {e}")
+        
+        # Get analysis 4 (49 non-choice events, Fisher z-transformed)
+        analysis4 = [r for r in stats['run2'] if r.get('analysis') == 4]
+        if analysis4:
+            html.append("""<div class="stats-box"><strong>49 Non-Choice Events - One-sample t-tests (Fisher z-transformed):</strong><br>""")
+            for row in analysis4:
+                condition = row.get('condition', '').upper()
+                mean_r = row.get('mean', '')
+                t_stat = row.get('t_stat', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                df_val = row.get('df', n-1 if pd.notna(n) else '')
+                html.append(f"{condition}: mean z = {format_stat_value(mean_r)}, "
+                          f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+            html.append("</div>")
+        
+        # Get ANOVA for analysis 4
+        try:
+            run2_anova_file = os.path.join(loader.get_output_dir("run2_individual_variability_recalled_events"),
+                                         "isc_anova_results_all_analyses.xlsx")
+            if os.path.exists(run2_anova_file):
+                anova_df = pd.read_excel(run2_anova_file)
+                anova4 = anova_df[anova_df['analysis'] == 4]
+                if not anova4.empty:
+                    html.append("""<div class="stats-box"><strong>49 Non-Choice Events - ANOVA (Fisher z-transformed):</strong><br>""")
+                    for _, row in anova4.iterrows():
+                        f_stat = row.get('f_stat', row.get('F_statistic', row.get('F', '')))
+                        df_between = row.get('df_between', row.get('df1', ''))
+                        df_within = row.get('df_within', row.get('df2', ''))
+                        p_val = row.get('p_value', row.get('PR(>F)', ''))
+                        if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    html.append("</div>")
+        except Exception as e:
+            print(f"Error loading run2 ANOVA: {e}")
     
     html.append("""
             <p>While events differed in their overall memorability, Recall ISC was significantly above zero 
@@ -554,6 +628,26 @@ def generate_html_report(stats):
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
                           f"p = {format_stat_value(p_val)}<br>")
             elif condition == 'Free_vs_Yoke' and analysis == 'raw':
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Choice ISC Results (Fisher z-transformed):</strong><br>""")
+        for row in stats['run3']:
+            analysis = row.get('Analysis', '')
+            condition = row.get('Condition', '')
+            if analysis == 'z_transformed' and condition in ['free', 'yoke']:
+                condition_upper = condition.upper()
+                mean_r = row.get('Mean', '')
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N_pairs', '')
+                df_val = n-1 if pd.notna(n) else ''
+                html.append(f"{condition_upper}: mean z = {format_stat_value(mean_r)}, "
+                          f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+            elif condition == 'Free_vs_Yoke' and analysis == 'z_transformed':
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
@@ -656,6 +750,20 @@ def generate_html_report(stats):
                     html.append(f"{story} {condition} {measure}: t({format_stat_value(n-1)}) = "
                               f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):</strong><br>""")
+        for row in stats['run5']:
+            if row.get('Analysis') == 'fisher_z' or (row.get('Transform') == 'Fisher z-transformed'):
+                story = row.get('Story', '')
+                condition = row.get('Condition', '').upper()
+                measure = row.get('Centrality_Type', '')
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                if pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n):
+                    html.append(f"{story} {condition} {measure}: t({format_stat_value(n-1)}) = "
+                              f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
     
     html.append("""
             <p>For both stories, semantic centrality significantly predicted recall, i.e., a significant semantic 
@@ -704,10 +812,65 @@ def generate_html_report(stats):
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
         
+        html.append("""<div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
+        for row in stats['run6']:
+            if (row.get('Analysis') == 'One-way ANOVA' and 
+                row.get('Measure') == 'Semantic Centrality' and
+                row.get('Transform') == 'Fisher z-transformed'):
+                story = row.get('Story', '')
+                f_stat = row.get('F_statistic', '')
+                df_between = row.get('df_between', '')
+                df_within = row.get('df_within', '')
+                p_val = row.get('p_value', '')
+                html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Raw values):</strong><br>""")
+        for row in stats['run6']:
+            if (row.get('Analysis') == 'One-way ANOVA' and 
+                row.get('Measure') == 'Causal Centrality' and
+                row.get('Transform') == 'Raw values'):
+                story = row.get('Story', '')
+                f_stat = row.get('F_statistic', '')
+                df_between = row.get('df_between', '')
+                df_within = row.get('df_within', '')
+                p_val = row.get('p_value', '')
+                html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
+        for row in stats['run6']:
+            if (row.get('Analysis') == 'One-way ANOVA' and 
+                row.get('Measure') == 'Causal Centrality' and
+                row.get('Transform') == 'Fisher z-transformed'):
+                story = row.get('Story', '')
+                f_stat = row.get('F_statistic', '')
+                df_between = row.get('df_between', '')
+                df_within = row.get('df_within', '')
+                p_val = row.get('p_value', '')
+                html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
         html.append("""<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Raw values):</strong><br>""")
         for row in stats['run6']:
             if (row.get('Analysis') == 'Repeated Measures ANOVA' and
                 row.get('Transform') == 'Raw values'):
+                story = row.get('Story', '')
+                f_stat = row.get('F_statistic', '')
+                df_between = row.get('df_between', '')
+                df_within = row.get('df_within', '')
+                p_val = row.get('p_value', '')
+                html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Fisher z-transformed):</strong><br>""")
+        for row in stats['run6']:
+            if (row.get('Analysis') == 'Repeated Measures ANOVA' and
+                row.get('Transform') == 'Fisher z-transformed'):
                 story = row.get('Story', '')
                 f_stat = row.get('F_statistic', '')
                 df_between = row.get('df_between', '')
@@ -764,10 +927,35 @@ def generate_html_report(stats):
                           f"p = {format_stat_value(p_val)}<br>")
         html.append("</div>")
         
+        html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Fisher z-transformed):</strong><br>""")
+        for row in stats['run7']:
+            if (row.get('Analysis') == 'One-sample t-test' and
+                row.get('Transform') == 'Fisher z-transformed'):
+                condition = row.get('Condition', '').upper()
+                t_stat = row.get('t_statistic', '')
+                p_val = row.get('p_value', '')
+                n = row.get('N', '')
+                html.append(f"{condition}: t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
+                          f"p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Raw values):</strong><br>""")
         for row in stats['run7']:
             if (row.get('Analysis') == 'One-way ANOVA' and
                 row.get('Transform') == 'Raw values'):
+                story = row.get('Story', '')
+                f_stat = row.get('F_statistic', '')
+                df_between = row.get('df_between', '')
+                df_within = row.get('df_within', '')
+                p_val = row.get('p_value', '')
+                html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+        html.append("</div>")
+        
+        html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Fisher z-transformed):</strong><br>""")
+        for row in stats['run7']:
+            if (row.get('Analysis') == 'One-way ANOVA' and
+                row.get('Transform') == 'Fisher z-transformed'):
                 story = row.get('Story', '')
                 f_stat = row.get('F_statistic', '')
                 df_between = row.get('df_between', '')
