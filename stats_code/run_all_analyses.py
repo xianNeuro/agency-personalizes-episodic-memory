@@ -72,9 +72,18 @@ def extract_all_statistics():
         if os.path.exists(run2_file):
             df = pd.read_excel(run2_file)
             stats['run2'] = df.to_dict('records')
+        
+        # Load post-hoc tests for run2
+        run2_posthoc_file = os.path.join(loader.get_output_dir("run2_individual_variability_recalled_events"),
+                                         "isc_posthoc_results_all_analyses.xlsx")
+        if os.path.exists(run2_posthoc_file):
+            stats['run2_posthoc'] = pd.read_excel(run2_posthoc_file)
+        else:
+            stats['run2_posthoc'] = None
     except Exception as e:
         print(f"Error loading run2 stats: {e}")
         stats['run2'] = None
+        stats['run2_posthoc'] = None
     
     # Run 3: Individual variability in choices
     try:
@@ -219,6 +228,85 @@ def format_stat_value(val):
         else:
             return f"{val:.3f}"
     return str(val)
+
+def get_posthoc_tests_for_anova(anova_p_val, posthoc_df, analysis_num=None, story=None, measure=None, transform=None):
+    """Extract post-hoc tests for a significant ANOVA (p < 0.05)"""
+    if pd.isna(anova_p_val) or anova_p_val >= 0.05:
+        return None
+    
+    posthoc_results = []
+    
+    if posthoc_df is not None:
+        # Handle DataFrame
+        if isinstance(posthoc_df, pd.DataFrame) and not posthoc_df.empty:
+            # Filter posthoc tests
+            filtered = posthoc_df.copy()
+            
+            if analysis_num is not None and 'analysis' in filtered.columns:
+                filtered = filtered[filtered['analysis'] == analysis_num]
+            
+            if story is not None and 'Story' in filtered.columns:
+                filtered = filtered[filtered['Story'].str.contains(story, case=False, na=False)]
+            
+            if measure is not None and 'Measure' in filtered.columns:
+                filtered = filtered[filtered['Measure'] == measure]
+            
+            if transform is not None and 'Transform' in filtered.columns:
+                filtered = filtered[filtered['Transform'] == transform]
+            
+            if not filtered.empty:
+                for _, row in filtered.iterrows():
+                    comparison = row.get('comparison', row.get('Condition', ''))
+                    t_stat = row.get('t_stat', row.get('t_statistic', ''))
+                    p_val = row.get('p_value', '')
+                    # Calculate df from sample sizes if not present
+                    df = row.get('df', row.get('df_within', ''))
+                    if pd.isna(df) or df == '':
+                        n_free = row.get('n_free', 0)
+                        n_yoke = row.get('n_yoke', 0)
+                        n_pasv = row.get('n_pasv', 0)
+                        if 'Free vs Yoked' in str(comparison) and n_free > 0 and n_yoke > 0:
+                            df = n_free + n_yoke - 2
+                        elif 'Free vs Passive' in str(comparison) and n_free > 0 and n_pasv > 0:
+                            df = n_free + n_pasv - 2
+                        elif 'Yoked vs Passive' in str(comparison) and n_yoke > 0 and n_pasv > 0:
+                            df = n_yoke + n_pasv - 2
+                    
+                    if pd.notna(t_stat) and pd.notna(p_val):
+                        posthoc_results.append({
+                            'comparison': comparison,
+                            't_stat': t_stat,
+                            'p_val': p_val,
+                            'df': df
+                        })
+        # Handle list of dicts (from stats['run6'] or stats['run7'])
+        elif isinstance(posthoc_df, list):
+            for row in posthoc_df:
+                if row.get('Analysis') == 'Post-hoc t-test':
+                    # Check filters
+                    match = True
+                    if story is not None and row.get('Story') != story:
+                        match = False
+                    if measure is not None and row.get('Measure') != measure:
+                        match = False
+                    if transform is not None and row.get('Transform') != transform:
+                        match = False
+                    
+                    if match:
+                        comparison = row.get('Condition', '')
+                        t_stat = row.get('t_statistic', '')
+                        p_val = row.get('p_value', '')
+                        df = row.get('df_within', '')
+                        
+                        if pd.notna(t_stat) and pd.notna(p_val):
+                            posthoc_results.append({
+                                'comparison': comparison,
+                                't_stat': t_stat,
+                                'p_val': p_val,
+                                'df': df
+                            })
+    
+    return posthoc_results if posthoc_results else None
 
 def generate_html_report(stats):
     """Generate comprehensive HTML report with manuscript text and statistics"""
@@ -426,6 +514,17 @@ def generate_html_report(stats):
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                                       f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    
+                    # Add post-hoc tests if ANOVA is significant (in same box)
+                    if not anova1.empty:
+                        p_val = anova1.iloc[0].get('p_value', 1.0)
+                        if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
+                            posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=1)
+                            if posthoc_tests:
+                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                                for test in posthoc_tests:
+                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
+                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -463,6 +562,17 @@ def generate_html_report(stats):
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                                       f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    
+                    # Add post-hoc tests if ANOVA is significant (in same box)
+                    if not anova2.empty:
+                        p_val = anova2.iloc[0].get('p_value', 1.0)
+                        if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
+                            posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=2)
+                            if posthoc_tests:
+                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                                for test in posthoc_tests:
+                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
+                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -500,6 +610,17 @@ def generate_html_report(stats):
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                                       f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    
+                    # Add post-hoc tests if ANOVA is significant (in same box)
+                    if not anova3.empty:
+                        p_val = anova3.iloc[0].get('p_value', 1.0)
+                        if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
+                            posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=3)
+                            if posthoc_tests:
+                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                                for test in posthoc_tests:
+                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
+                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -537,6 +658,17 @@ def generate_html_report(stats):
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                                       f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                    
+                    # Add post-hoc tests if ANOVA is significant (in same box)
+                    if not anova4.empty:
+                        p_val = anova4.iloc[0].get('p_value', 1.0)
+                        if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
+                            posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=4)
+                            if posthoc_tests:
+                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                                for test in posthoc_tests:
+                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
+                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -810,6 +942,35 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA is significant (in same box)
+                if pd.notna(p_val) and p_val < 0.05:
+                    posthoc_rows = [r for r in stats['run6'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   'Semantic Centrality' in str(r.get('Measure', '')) and
+                                   r.get('Transform') == 'Raw values' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            # Extract comparison from Measure column (format: "Semantic Centrality: free_vs_yoke")
+                            measure_str = str(posthoc.get('Measure', ''))
+                            if ':' in measure_str:
+                                comparison = measure_str.split(':')[1].strip().replace('_', ' vs ')
+                                # Clean up comparison name (remove extra "vs" if present)
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                                # Capitalize first letter of each word
+                                comparison = ' '.join(word.capitalize() for word in comparison.split())
+                            else:
+                                comparison = posthoc.get('Condition', '')
+                                # Clean up comparison name (remove extra "vs" if present)
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -824,6 +985,35 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA is significant (in same box)
+                if pd.notna(p_val) and p_val < 0.05:
+                    posthoc_rows = [r for r in stats['run6'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   'Semantic Centrality' in str(r.get('Measure', '')) and
+                                   r.get('Transform') == 'Fisher z-transformed' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            # Extract comparison from Measure column (format: "Semantic Centrality: free_vs_yoke")
+                            measure_str = str(posthoc.get('Measure', ''))
+                            if ':' in measure_str:
+                                comparison = measure_str.split(':')[1].strip().replace('_', ' vs ')
+                                # Clean up comparison name (remove extra "vs" if present)
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                                # Capitalize first letter of each word
+                                comparison = ' '.join(word.capitalize() for word in comparison.split())
+                            else:
+                                comparison = posthoc.get('Condition', '')
+                                # Clean up comparison name (remove extra "vs" if present)
+                                comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Raw values):</strong><br>""")
@@ -950,6 +1140,25 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA is significant (in same box)
+                if pd.notna(p_val) and p_val < 0.05:
+                    posthoc_rows = [r for r in stats['run7'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   r.get('Transform') == 'Raw values' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            comparison = posthoc.get('Condition', '')
+                            # Clean up comparison name (remove extra "vs" if present)
+                            comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -963,6 +1172,25 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
                           f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                
+                # Add post-hoc tests if ANOVA is significant (in same box)
+                if pd.notna(p_val) and p_val < 0.05:
+                    posthoc_rows = [r for r in stats['run7'] if 
+                                   r.get('Analysis') == 'Post-hoc t-test' and
+                                   r.get('Transform') == 'Fisher z-transformed' and
+                                   r.get('Story') == story]
+                    if posthoc_rows:
+                        html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+                        for posthoc in posthoc_rows:
+                            comparison = posthoc.get('Condition', '')
+                            # Clean up comparison name (remove extra "vs" if present)
+                            comparison = comparison.replace(' vs vs vs ', ' vs ').replace(' vs vs ', ' vs ')
+                            t_stat = posthoc.get('t_statistic', '')
+                            p_val_posthoc = posthoc.get('p_value', '')
+                            df_posthoc = posthoc.get('df_within', '')
+                            if pd.notna(t_stat) and pd.notna(p_val_posthoc):
+                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
+                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
         html.append("</div>")
     
     html.append("""
