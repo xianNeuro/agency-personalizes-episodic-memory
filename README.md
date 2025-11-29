@@ -276,8 +276,8 @@ All analysis code is provided:
 - **Figure generation**: `figures/` contains all plotting code
 - **Utilities**: Supporting functions for data loading and analysis
 
-Additional Information
-- **Reproducibility check**: An independent research assistant has successfully reproduced the results reported in this manuscript by following the methods and analysis procedures described herein. The reproduction repository is available at [SissiLai361/Reproduce](https://github.com/SissiLai361/Reproduce)
+Additional information:
+- **Reproducibility check**: An independent research assistant (Yijun Lai) has successfully reproduced the results reported in this manuscript by following the methods and analysis procedures described herein. The reproduction repository is available at [SissiLai361/Reproduce](https://github.com/SissiLai361/Reproduce)
 
 ## Citation
 
