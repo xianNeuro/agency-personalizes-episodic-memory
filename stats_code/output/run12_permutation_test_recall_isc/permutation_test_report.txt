@@ -16,8 +16,8 @@ ANALYSIS: 64 Shared Events
 Free condition mean ISC: 0.1364
 
 Permutation distributions:
-  Yoked: Mean = 0.2185, Std = 0.0201, N = 10000
-  Passive: Mean = 0.2531, Std = 0.0180, N = 10000
+  Yoked: Mean = 0.2183, Std = 0.0201, N = 10000
+  Passive: Mean = 0.2530, Std = 0.0180, N = 10000
 
 Statistical tests:
   Free vs Yoked: p = 0.000000 (proportion of Yoked samples below Free mean)
@@ -26,7 +26,7 @@ Statistical tests:
   Free vs Passive: p = 0.000000 (proportion of Passive samples below Free mean)
     Result: Free ISC significantly lower than Passive (p < 0.001)
 
-  Yoked vs Passive: t = -128.3238, p = 0.000000
+  Yoked vs Passive: t = -128.5791, p = 0.000000
     Result: Significant difference (p < 0.001)
 
 ================================================================================

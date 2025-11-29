@@ -23,6 +23,11 @@ For comparison - Want events:
   Yoked want events: Mean = 0.3420, Std = 0.2609
   Free want events: Mean = 0.3974, Std = 0.2461
 
+PE-Boost Correlation: PE-Boost vs Percentage of Choices Wanted
+  PE-boost = correlation between want-not vector and recall vector for choice events (per subject)
+  r(42) = 0.335, p = 0.026
+  Result: Significant correlation (p < 0.05)
+
 ================================================================================
 ROMANCE STORY (MV)
 ================================================================================
@@ -38,3 +43,8 @@ Two-sample t-test: Denied Choice Events (Yoked not-want) vs Granted Choice Event
 For comparison - Want events:
   Yoked want events: Mean = 0.3190, Std = 0.2024
   Free want events: Mean = 0.3662, Std = 0.2382
+
+PE-Boost Correlation: PE-Boost vs Percentage of Choices Wanted
+  PE-boost = correlation between want-not vector and recall vector for choice events (per subject)
+  r(49) = 0.137, p = 0.336
+  Result: Not significant (p >= 0.05)

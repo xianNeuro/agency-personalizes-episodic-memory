@@ -185,10 +185,29 @@ def extract_all_statistics():
         if os.path.exists(run11_file_mv):
             df_mv = pd.read_excel(run11_file_mv)
             stats['run11_mv'] = df_mv.to_dict('records')
+        
+        # Load PE-boost correlation results
+        run11_pe_boost_corr_ba = os.path.join(loader.get_output_dir("run11_agency_denial_choice_events"),
+                                               "adventure_correlation_pe_boost_percentage_wanted.xlsx")
+        if os.path.exists(run11_pe_boost_corr_ba):
+            df_pe_boost_corr_ba = pd.read_excel(run11_pe_boost_corr_ba)
+            stats['run11_pe_boost_corr_ba'] = df_pe_boost_corr_ba.to_dict('records')[0] if len(df_pe_boost_corr_ba) > 0 else None
+        else:
+            stats['run11_pe_boost_corr_ba'] = None
+            
+        run11_pe_boost_corr_mv = os.path.join(loader.get_output_dir("run11_agency_denial_choice_events"),
+                                               "romance_correlation_pe_boost_percentage_wanted.xlsx")
+        if os.path.exists(run11_pe_boost_corr_mv):
+            df_pe_boost_corr_mv = pd.read_excel(run11_pe_boost_corr_mv)
+            stats['run11_pe_boost_corr_mv'] = df_pe_boost_corr_mv.to_dict('records')[0] if len(df_pe_boost_corr_mv) > 0 else None
+        else:
+            stats['run11_pe_boost_corr_mv'] = None
     except Exception as e:
         print(f"Error loading run11 stats: {e}")
         stats['run11_ba'] = None
         stats['run11_mv'] = None
+        stats['run11_corr_ba'] = None
+        stats['run11_corr_mv'] = None
     
     # Run 12: Permutation test recall ISC
     try:
@@ -1484,8 +1503,50 @@ def generate_html_report(stats):
             <p>The percentage of choices granted in the Yoked participants was not predictive of individual's recall performance, 
             recall similarity to their Free and Passive condition counterparts, semantic and causal centrality effects on memory, 
             nor their neighbor encoding effects (all ps>.3); however, higher percentage of choices granted predicted greater 
-            individual tendency to forget the choice-denied events (Adventure: r(44) = .335, p = .026. Romance: r(51) = .137, 
-            p = .337; see <span class="supplement-ref">Supplement S7</span> for details).</p>
+            individual tendency to forget the choice-denied events (""")
+    
+    # Add PE-boost correlation results first
+    if stats.get('run11_pe_boost_corr_ba') or stats.get('run11_pe_boost_corr_mv'):
+        pe_boost_corr_parts = []
+        if stats.get('run11_pe_boost_corr_ba'):
+            pe_corr_ba = stats['run11_pe_boost_corr_ba']
+            r_val = pe_corr_ba.get('r', 0)
+            p_val = pe_corr_ba.get('p', 1)
+            df_val = pe_corr_ba.get('df', 0)
+            pe_boost_corr_parts.append(f"Adventure: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
+        
+        if stats.get('run11_pe_boost_corr_mv'):
+            pe_corr_mv = stats['run11_pe_boost_corr_mv']
+            r_val = pe_corr_mv.get('r', 0)
+            p_val = pe_corr_mv.get('p', 1)
+            df_val = pe_corr_mv.get('df', 0)
+            pe_boost_corr_parts.append(f"Romance: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
+        
+        if pe_boost_corr_parts:
+            html.append("PE-boost (correlation between want-not and recall vectors per subject) vs percentage wanted: ")
+            html.append(". ".join(pe_boost_corr_parts) + ". ")
+    
+    # Add correlation results
+    if stats.get('run11_corr_ba') or stats.get('run11_corr_mv'):
+        corr_parts = []
+        if stats.get('run11_corr_ba'):
+            corr_ba = stats['run11_corr_ba']
+            r_val = corr_ba.get('r', 0)
+            p_val = corr_ba.get('p', 1)
+            df_val = corr_ba.get('df', 0)
+            corr_parts.append(f"Adventure: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
+        
+        if stats.get('run11_corr_mv'):
+            corr_mv = stats['run11_corr_mv']
+            r_val = corr_mv.get('r', 0)
+            p_val = corr_mv.get('p', 1)
+            df_val = corr_mv.get('df', 0)
+            corr_parts.append(f"Romance: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
+        
+        if corr_parts:
+            html.append(". ".join(corr_parts) + ". ")
+    
+    html.append("""see <span class="supplement-ref">Supplement S7</span> for details).</p>
             
             <p>Together, these results suggest that in a context lacking full agentive control, perceived agency and their 
             effects on memory could vary across individuals in non-systematic ways. The one exception is that with more control 

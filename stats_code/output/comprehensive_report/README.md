@@ -7,7 +7,7 @@
 # Comprehensive Analysis Report: Agency Effects on Memory
 
 
-*Generated: 2025-11-26 17:36:18*
+*Generated: 2025-11-29 12:59:36*
 
 
 *This report contains the manuscript main results section with full statistics inserted from analyses run1 through run13.*
@@ -173,8 +173,8 @@ ANALYSIS: 64 Shared Events
 ================================================================================
 Free condition mean ISC: 0.1364
 Permutation distributions:
-Yoked: Mean = 0.2185, Std = 0.0201, N = 10000
-Passive: Mean = 0.2531, Std = 0.0180, N = 10000
+Yoked: Mean = 0.2183, Std = 0.0201, N = 10000
+Passive: Mean = 0.2530, Std = 0.0180, N = 10000
 Statistical tests:
 Free vs Yoked: p = 0.000000 (proportion of Yoked samples below Free mean)
 Result: Free ISC significantly lower than Yoked (p
@@ -601,8 +601,10 @@ to a variation of tendency to selective recall or forget the denied choice event
 The percentage of choices granted in the Yoked participants was not predictive of individual's recall performance,
 recall similarity to their Free and Passive condition counterparts, semantic and causal centrality effects on memory,
 nor their neighbor encoding effects (all ps>.3); however, higher percentage of choices granted predicted greater
-individual tendency to forget the choice-denied events (Adventure: r(44) = .335, p = .026. Romance: r(51) = .137,
-p = .337; see **Supplement S7** for details).
+individual tendency to forget the choice-denied events (
+PE-boost (correlation between want-not and recall vectors per subject) vs percentage wanted:
+Adventure: r(42) = 0.335, p = 0.026. Romance: r(49) = 0.137, p = 0.336.
+see **Supplement S7** for details).
 
 
 

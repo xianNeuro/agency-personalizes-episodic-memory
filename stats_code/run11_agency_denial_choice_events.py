@@ -20,7 +20,7 @@ Compare: Yoked not-want (denied) events vs Free not-want (granted) events
 import pandas as pd
 import numpy as np
 import os
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_ind, pearsonr
 from data_structure import RecallDataLoader
 
 def identify_story_paths(loader, story):
@@ -256,6 +256,100 @@ def analyze_agency_denial():
         print(f"  Yoked want events: N = {n}, Mean = {np.mean(yoke_want_recall):.4f}, Std = {np.std(yoke_want_recall, ddof=1):.4f}")
         print(f"  Free want events: N = {n}, Mean = {np.mean(free_want_recall):.4f}, Std = {np.std(free_want_recall, ddof=1):.4f}")
         
+        # NEW ANALYSIS 1: PE-boost - Correlation between want-not vector and recall vector per subject
+        print("\n" + "="*80)
+        print("PE-BOOST: Per-Subject Correlation between Want-Not Vector and Recall Vector")
+        print("="*80)
+        
+        # For each yoked subject, compute correlation between wn vector and recall vector for choice events
+        pe_boost_data = []  # List of dicts with subject_id, pe_boost, percentage_wanted
+        
+        for pair in matched_pairs:
+            yoke_id = pair['yoke_id']
+            try:
+                # Get choice events recall and want/not for yoked subject
+                yoke_choice_recall, yoke_choice_want_not = get_choice_events_recall_and_want(
+                    loader, story, 'yoke', yoke_id)
+                
+                if len(yoke_choice_recall) == 0 or len(yoke_choice_want_not) == 0:
+                    continue
+                
+                # Ensure same length
+                min_len = min(len(yoke_choice_recall), len(yoke_choice_want_not))
+                yoke_choice_recall = np.array(yoke_choice_recall[:min_len])
+                yoke_choice_want_not = np.array(yoke_choice_want_not[:min_len])
+                
+                # Filter to valid data (non-NaN want_not values)
+                valid_mask = pd.notna(yoke_choice_want_not)
+                if np.sum(valid_mask) < 3:  # Need at least 3 data points for correlation
+                    continue
+                
+                valid_recall = yoke_choice_recall[valid_mask]
+                valid_want_not = yoke_choice_want_not[valid_mask]
+                
+                # Compute correlation between want-not vector and recall vector
+                # This is the PE-boost for this subject
+                r_pe_boost, p_pe_boost = pearsonr(valid_want_not, valid_recall)
+                
+                # Compute percentage wanted (average of wn vector)
+                percentage_wanted = np.mean(valid_want_not == 1)  # Proportion where want_not = 1
+                
+                if not np.isnan(r_pe_boost) and not np.isnan(percentage_wanted):
+                    pe_boost_data.append({
+                        'yoke_id': yoke_id,
+                        'pe_boost': r_pe_boost,
+                        'percentage_wanted': percentage_wanted,
+                        'n_choice_events': len(valid_want_not)
+                    })
+                    
+            except Exception as e:
+                print(f"  Error processing {yoke_id} for PE-boost: {e}")
+                continue
+        
+        print(f"\nComputed PE-boost for {len(pe_boost_data)} yoked subjects")
+        if len(pe_boost_data) > 0:
+            pe_boosts = [d['pe_boost'] for d in pe_boost_data]
+            print(f"  PE-boost: Mean = {np.mean(pe_boosts):.4f}, Std = {np.std(pe_boosts, ddof=1):.4f}, Range = [{np.min(pe_boosts):.4f}, {np.max(pe_boosts):.4f}]")
+        
+        # NEW ANALYSIS 2: Correlation between PE-boost and percentage wanted
+        print("\n" + "="*80)
+        print("CORRELATION: PE-Boost vs Percentage of Choices Wanted")
+        print("="*80)
+        
+        if len(pe_boost_data) >= 3:
+            pe_boosts = np.array([d['pe_boost'] for d in pe_boost_data])
+            percentage_wanted = np.array([d['percentage_wanted'] for d in pe_boost_data])
+            
+            # Compute Pearson correlation
+            r, p = pearsonr(pe_boosts, percentage_wanted)
+            n_corr = len(pe_boost_data)
+            df_corr = n_corr - 2
+            
+            print(f"\nCorrelation analysis:")
+            print(f"  N = {n_corr}")
+            print(f"  PE-boost: Mean = {np.mean(pe_boosts):.4f}, Std = {np.std(pe_boosts, ddof=1):.4f}")
+            print(f"  Percentage wanted: Mean = {np.mean(percentage_wanted):.4f}, Std = {np.std(percentage_wanted, ddof=1):.4f}")
+            print(f"  r({df_corr}) = {r:.3f}, p = {p:.3f}")
+            
+            if p < 0.001:
+                print(f"  Result: Significant correlation (p < 0.001)")
+            elif p < 0.01:
+                print(f"  Result: Significant correlation (p < 0.01)")
+            elif p < 0.05:
+                print(f"  Result: Significant correlation (p < 0.05)")
+            else:
+                print(f"  Result: Not significant (p >= 0.05)")
+            
+            pe_boost_correlation = {
+                'r': r,
+                'p': p,
+                'n': n_corr,
+                'df': df_corr
+            }
+        else:
+            print(f"\nInsufficient data for correlation analysis (N = {len(pe_boost_data)})")
+            pe_boost_correlation = None
+        
         all_results[story] = {
             'matched_pairs': matched_pairs,
             'yoke_want_recall': yoke_want_recall,
@@ -264,7 +358,9 @@ def analyze_agency_denial():
             'free_not_want_recall': free_not_want_recall,
             't_stat': t_stat,
             'p_val': p_val,
-            'n': n
+            'n': n,
+            'pe_boost_data': pe_boost_data,
+            'pe_boost_correlation': pe_boost_correlation
         }
     
     # Save results
@@ -307,6 +403,20 @@ def analyze_agency_denial():
         detailed_file = os.path.join(output_dir, f"{story_name.lower()}_agency_denial_detailed.xlsx")
         detailed_df.to_excel(detailed_file, index=False)
         print(f"Saved {story_name} detailed results to: {detailed_file}")
+        
+        # Save PE-boost data
+        if results.get('pe_boost_data') is not None and len(results['pe_boost_data']) > 0:
+            pe_boost_df = pd.DataFrame(results['pe_boost_data'])
+            pe_boost_file = os.path.join(output_dir, f"{story_name.lower()}_pe_boost_per_subject.xlsx")
+            pe_boost_df.to_excel(pe_boost_file, index=False)
+            print(f"Saved {story_name} PE-boost data to: {pe_boost_file}")
+        
+        # Save PE-boost correlation results
+        if results.get('pe_boost_correlation') is not None:
+            pe_boost_corr_df = pd.DataFrame([results['pe_boost_correlation']])
+            pe_boost_corr_file = os.path.join(output_dir, f"{story_name.lower()}_correlation_pe_boost_percentage_wanted.xlsx")
+            pe_boost_corr_df.to_excel(pe_boost_corr_file, index=False)
+            print(f"Saved {story_name} PE-boost correlation results to: {pe_boost_corr_file}")
     
     # Create summary report
     report_lines = []
@@ -350,6 +460,37 @@ def analyze_agency_denial():
         report_lines.append(f"  Yoked want events: Mean = {np.mean(results['yoke_want_recall']):.4f}, Std = {np.std(results['yoke_want_recall'], ddof=1):.4f}")
         report_lines.append(f"  Free want events: Mean = {np.mean(results['free_want_recall']):.4f}, Std = {np.std(results['free_want_recall'], ddof=1):.4f}")
         report_lines.append("")
+        
+        # Add PE-boost correlation results
+        if results.get('pe_boost_correlation') is not None:
+            pe_corr = results['pe_boost_correlation']
+            report_lines.append("PE-Boost Correlation: PE-Boost vs Percentage of Choices Wanted")
+            report_lines.append(f"  PE-boost = correlation between want-not vector and recall vector for choice events (per subject)")
+            report_lines.append(f"  r({pe_corr['df']}) = {pe_corr['r']:.3f}, p = {pe_corr['p']:.3f}")
+            if pe_corr['p'] < 0.001:
+                report_lines.append(f"  Result: Significant correlation (p < 0.001)")
+            elif pe_corr['p'] < 0.01:
+                report_lines.append(f"  Result: Significant correlation (p < 0.01)")
+            elif pe_corr['p'] < 0.05:
+                report_lines.append(f"  Result: Significant correlation (p < 0.05)")
+            else:
+                report_lines.append(f"  Result: Not significant (p >= 0.05)")
+            report_lines.append("")
+        
+        # Add correlation results
+        if results.get('correlation') is not None:
+            corr = results['correlation']
+            report_lines.append("Correlation: Percentage of Choices Wanted vs Recall/Forget Tendency for Choice-Denied Events")
+            report_lines.append(f"  r({corr['df']}) = {corr['r']:.3f}, p = {corr['p']:.3f}")
+            if corr['p'] < 0.001:
+                report_lines.append(f"  Result: Significant correlation (p < 0.001)")
+            elif corr['p'] < 0.01:
+                report_lines.append(f"  Result: Significant correlation (p < 0.01)")
+            elif corr['p'] < 0.05:
+                report_lines.append(f"  Result: Significant correlation (p < 0.05)")
+            else:
+                report_lines.append(f"  Result: Not significant (p >= 0.05)")
+            report_lines.append("")
     
     report_file = os.path.join(output_dir, "agency_denial_choice_events_report.txt")
     with open(report_file, 'w') as f:

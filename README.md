@@ -276,6 +276,16 @@ All analysis code is provided:
 - **Figure generation**: `figures/` contains all plotting code
 - **Utilities**: Supporting functions for data loading and analysis
 
+## Additional Information
+
+### Independent Reproduction
+
+An independent research assistant has successfully reproduced the results reported in this manuscript by following the methods and analysis procedures described herein. The reproduction repository is available at:
+
+- **Reproduction Repository**: [SissiLai361/Reproduce](https://github.com/SissiLai361/Reproduce)
+
+This independent reproduction provides additional validation of the reproducibility and robustness of the reported findings.
+
 ## Citation
 
 If you use this code or data, please cite:
