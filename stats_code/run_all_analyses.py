@@ -61,6 +61,29 @@ def extract_all_statistics():
             with pd.ExcelFile(run1_file) as xls:
                 for sheet in xls.sheet_names:
                     stats['run1'][sheet] = pd.read_excel(xls, sheet_name=sheet).to_dict('records')
+            
+            # Load engagement results (reading time and transportation)
+            engagement_measures = ['trans_score', 'avg_sent_readtime', 'sum_readtime']
+            for measure in engagement_measures:
+                sheet_name = f'Engagement_{measure}_stats'
+                anova_sheet = f'Engagement_{measure}_anova'
+                if sheet_name in stats['run1']:
+                    # Get group stats
+                    group_stats = pd.DataFrame(stats['run1'][sheet_name])
+                    stats[f'run1_engagement_{measure}_stats'] = group_stats
+                    # Get ANOVA results
+                    if anova_sheet in stats['run1']:
+                        anova_data = pd.DataFrame(stats['run1'][anova_sheet])
+                        # Find the C(condition) row
+                        condition_row = anova_data[anova_data.iloc[:, 0] == 'C(condition)']
+                        if len(condition_row) > 0:
+                            row = condition_row.iloc[0]
+                            stats[f'run1_engagement_{measure}'] = {
+                                'f_stat': row.get('F', 'N/A'),
+                                'df_between': int(row.get('df', 0)) if pd.notna(row.get('df')) else 'N/A',
+                                'df_within': int(anova_data[anova_data.iloc[:, 0] == 'Residual'].iloc[0].get('df', 0)) if len(anova_data[anova_data.iloc[:, 0] == 'Residual']) > 0 else 'N/A',
+                                'p_value': row.get('PR(>F)', 'N/A')
+                            }
     except Exception as e:
         print(f"Error loading run1 stats: {e}")
         stats['run1'] = None
@@ -466,9 +489,40 @@ def generate_html_report(stats):
             <p>There were no significant differences in recall performance across conditions in either story 
             (<span class="stat-inline">Adventure: F(2,113)=1.43, p=0.243</span>; 
             <span class="stat-inline">Romance: F(2,123)=0.67, p=0.513</span>; 
-            <span class="figure-ref">Supplementary Figure S3</span>). The Romance story additionally recorded 
-            individual reading speed and showed no difference across the three agency conditions (ps> .3; 
-            see <span class="supplement-ref">Supplement S3</span> for details). See <span class="supplement-ref">Supplement S4</span> 
+            <span class="figure-ref">Supplementary Figure S3</span>).</p>
+""")
+    
+    # Add engagement statistics if available
+    if stats.get('run1_engagement_trans_score') or stats.get('run1_engagement_avg_sent_readtime') or stats.get('run1_engagement_sum_readtime'):
+        html.append("""<div class="stats-box"><strong>Reading Time and Engagement Results (Romance Story):</strong><br>""")
+        
+        # Transportation score
+        if stats.get('run1_engagement_trans_score'):
+            eng = stats['run1_engagement_trans_score']
+            html.append(f"Transportation Score: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+        
+        # Average reading time per sentence
+        if stats.get('run1_engagement_avg_sent_readtime'):
+            eng = stats['run1_engagement_avg_sent_readtime']
+            html.append(f"Average Reading Time per Story Sentence: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+        
+        # Total reading time
+        if stats.get('run1_engagement_sum_readtime'):
+            eng = stats['run1_engagement_sum_readtime']
+            html.append(f"Overall Reading Time for Entire Story-Path: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+        
+        html.append("</div>")
+    
+    html.append("""
+            <p>For the Romance story, we additionally recorded the reading time for each subject and measured individual 
+            engagement over the course of their reading via a 13-item modified version of the Narrative Transportation scale. 
+            There were no significant differences across the three agency conditions on participants' transportation score 
+            (<span class="stat-inline">F(2,123) = 1.82, p = 0.167</span>), average reading time per story sentence 
+            (<span class="stat-inline">F(2,123) = 0.40, p = 0.668</span>), or the overall reading time for the entire 
+            story-path they experienced (<span class="stat-inline">F(2,123) = 0.42, p = 0.656</span>). 
+            These results suggest that the overall engagement for the story remained roughly the same across the three agency conditions.</p>
+            
+            <p>See <span class="supplement-ref">Supplement S4</span> 
             for details about memory for choice and non-choice events; See <span class="supplement-ref">Supplement S5</span> 
             for details about recognition memory performance; See <span class="supplement-ref">Supplement S6</span> 
             for details about memory for denied and granted choice events.</p>

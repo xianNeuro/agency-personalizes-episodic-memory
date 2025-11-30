@@ -7,7 +7,7 @@
 # Comprehensive Analysis Report: Agency Effects on Memory
 
 
-*Generated: 2025-11-29 12:59:36*
+*Generated: 2025-11-30 15:04:14*
 
 
 *This report contains the manuscript main results section with full statistics inserted from analyses run1 through run13.*
@@ -29,15 +29,36 @@ if any part of a given event was mentioned in any recall sentence, it was counte
 ```
 Adventure: F(2,113) = 1.433, p = 0.243
 Romance: F(2,123) = 0.671, p = 0.513
+Romance: F(2,123) = 1.818, p = 0.167
+Romance: F(2,123) = 0.405, p = 0.668
+Romance: F(2,123) = 0.423, p = 0.656
 ```
 
 
 There were no significant differences in recall performance across conditions in either story
 (**Adventure: F(2,113)=1.43, p=0.243**;
 **Romance: F(2,123)=0.67, p=0.513**;
-*Supplementary Figure S3*). The Romance story additionally recorded
-individual reading speed and showed no difference across the three agency conditions (ps> .3;
-see **Supplement S3** for details). See **Supplement S4**
+*Supplementary Figure S3*).
+
+**Reading Time and Engagement Results (Romance Story):**
+```
+Transportation Score: F(2,123) = 1.818, p = 0.167
+Average Reading Time per Story Sentence: F(2,123) = 0.405, p = 0.668
+Overall Reading Time for Entire Story-Path: F(2,123) = 0.423, p = 0.656
+```
+
+
+For the Romance story, we additionally recorded the reading time for each subject and measured individual
+engagement over the course of their reading via a 13-item modified version of the Narrative Transportation scale.
+There were no significant differences across the three agency conditions on participants' transportation score
+(**F(2,123) = 1.82, p = 0.167**), average reading time per story sentence
+(**F(2,123) = 0.40, p = 0.668**), or the overall reading time for the entire
+story-path they experienced (**F(2,123) = 0.42, p = 0.656**).
+These results suggest that the overall engagement for the story remained roughly the same across the three agency conditions.
+
+
+
+See **Supplement S4**
 for details about memory for choice and non-choice events; See **Supplement S5**
 for details about recognition memory performance; See **Supplement S6**
 for details about memory for denied and granted choice events.

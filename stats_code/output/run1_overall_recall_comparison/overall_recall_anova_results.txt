@@ -32,6 +32,38 @@ One-Way ANOVA:
   Result: No significant difference across conditions (p >= 0.05)
 
 ================================================================================
+ROMANCE STORY: READING TIME AND ENGAGEMENT
+================================================================================
+
+For the Romance story, we additionally recorded the reading time for each subject and
+measured individual engagement over the course of their reading via a 13-item modified
+version of the Narrative Transportation scale. The following analyses examine whether
+there were differences across the three agency conditions on participants' transportation
+score, average reading time per story sentence, and overall reading time for the entire
+story-path they experienced.
+
+TRANSPORTATION SCORE:
+  Free: M = 26.722, SD = 10.932, N = 18
+  Passive: M = 28.855, SD = 9.046, N = 55
+  Yoked: M = 31.321, SD = 9.738, N = 53
+  One-Way ANOVA: F(2,123) = 1.818, p = 0.167
+
+AVERAGE READING TIME PER STORY SENTENCE:
+  Free: M = 5.058, SD = 1.828, N = 18
+  Passive: M = 5.381, SD = 2.649, N = 55
+  Yoked: M = 4.975, SD = 2.314, N = 53
+  One-Way ANOVA: F(2,123) = 0.405, p = 0.668
+
+OVERALL READING TIME FOR ENTIRE STORY-PATH:
+  Free: M = 32.800, SD = 11.842, N = 18
+  Passive: M = 34.879, SD = 16.928, N = 55
+  Yoked: M = 32.207, SD = 14.875, N = 53
+  One-Way ANOVA: F(2,123) = 0.423, p = 0.656
+
+These results suggest that the overall engagement for the story remained roughly the
+same across the three agency conditions.
+
+================================================================================
 SUMMARY
 ================================================================================
 
