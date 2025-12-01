@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+#recall_instructions {
+  text-align: center;
+  font-size: 18pt;
+  line-height: 1.1em;
+  margin: 0;
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%)
+}
+#recall_notes {
+  text-align: center;
+  font-size: 18pt;
+  line-height: 75%;
+  margin: 0;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%)
+}
+#recall_focus {
+  text-align: center;
+  font-size: 18pt;
+  line-height: 1.1em;
+  margin: 0;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%)
+}
+
+#recall_input {
+  text-align: center;
+  font-size: 24pt;
+  line-height: normal;
+  margin: 0;
+  position: absolute;
+  top: 72%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#button_box {
+  text-align: center;
+  font-size: 24pt;
+  position: absolute;
+  top: 90%;
+  left: 75%;
+  transform: translate(-50%, -50%);
+}
+
+</style>
+</head>
+
+<div id="recall_instructions" class="stim-div">
+  <p>Describe the story you read in as much detail as possible.</p>
+  <p>If at any time you realize that you forgot to mention something earlier, go ahead and mention it at that time.</p>
+  <p> <i>Completeness is more important than the order of the story</i>. </p>
+</div>
+
+<div id="recall_notes" class="stim-div">
+  <p><font size=5 color=grey>This text box is designed to capture your <i>unedited thoughts</i>.</font></p>
+  <p><font size=4 color=grey><b>Note #1</b>: everything you write is saved, but you can only see some of it onscreen.</font></p>
+  <p><font size=4 color=grey><b>Note #2</b>: you can only use backspace within the sentence you are <i>currently writing</i>.</font></p>
+</div>
+
+<textarea id="recall_input" tabindex="-1" rows="1" cols="50" placeholder="Type here!" name="description" style="overflow:hidden;resize:none;"  onpaste="return false;" onCopy="return false" onCut="return false" onDrag="return false" onDrop="return false" autocomplete="off" autofocus="autofocus"></textarea>
+
+  <script type="text/javascript">
+  //console.log(psiTurk.getInstructionIndicator())
+
+    //define variable  for recall  input
+    var inp = document.getElementById('recall_input');
+
+    //add event listener to prevent selecting
+    inp.addEventListener('select', function() {
+      this.selectionStart = this.selectionEnd;
+    }, false);
+
+    //add event listener to prevent inappropriate  keypresses
+    inp.addEventListener('keydown', function(event) {
+      const key = event.key; // const {key} = event; ES6+
+      if (key === "Backspace") {
+       if(inp.value.slice(-1) === "?" || inp.value.slice(-1) === "!" || inp.value.slice(-1) === "."){
+       	event.preventDefault();
+       }
+      } else if (key == "Enter" || key == "ArrowLeft"  || key == "ArrowRight" || key == "ArrowUp" || key == "ArrowDown") {
+      	event.preventDefault();
+      }
+    });
+
+    //define function to refocus on text box
+    function getfocus() {
+      document.getElementById("recall_input").focus();
+    }
+
+    //disable next button for a specied time delay following load
+    setTimeout(function() {
+      document.getElementById("next").disabled = false}, TimeLimit_Recall)
+
+  </script>
+
+  <div id=button_box class="instructionsnav">
+      <div class="row">
+          <div class="col-xs-8">
+          </div>
+          <div class="col-xs-2">
+              <button type="button" id="next" value="next" class="btn btn-primary btn-lg continue">
+              Next! <span class="glyphicon glyphicon-arrow-right"></span>
+              </button>
+          </div>
+      </div>
+  </div>
+
+
+</html>
