@@ -12,6 +12,32 @@
 
 *This report contains the manuscript main results section with full statistics inserted from analyses run1 through run13.*
 
+## Statistical Reporting
+
+**Full analysis code and test statistics, including all parametric test statistics (e.g., F, t, r) with confidence intervals, effect sizes, degrees of freedom, p-values, and non-parametric tests are provided in this report.**
+
+The comprehensive report includes:
+
+- **95% Confidence Intervals (CI)**: Reported for all means and mean differences where applicable
+  - Group means in ANOVA analyses
+  - Mean differences in post-hoc t-tests
+  - One-sample t-test means
+
+- **Effect Sizes**:
+  - **Cohen's d**: Reported for all t-tests (one-sample and two-sample independent samples tests)
+  - **Eta-squared (η²)**: Reported for ANOVA analyses
+  - **Partial eta-squared (ηp²)**: Reported for ANOVA analyses
+
+- **Test Statistics**: All parametric tests include:
+  - F-statistics with degrees of freedom for ANOVA
+  - t-statistics with degrees of freedom for t-tests
+  - Correlation coefficients (r) with degrees of freedom
+  - p-values
+
+- **Non-parametric Tests**: Permutation tests are included where applicable (run12, run13)
+
+All statistics are calculated and reported according to standard statistical practices. Confidence intervals are calculated using the t-distribution, and Cohen's d effect sizes follow standard conventions (small: d = 0.2, medium: d = 0.5, large: d = 0.8).
+
 
 
 ---
@@ -27,11 +53,16 @@ if any part of a given event was mentioned in any recall sentence, it was counte
 
 **Statistical Results:**
 ```
-Adventure: F(2,113) = 1.433, p = 0.243
-Romance: F(2,123) = 0.671, p = 0.513
-Romance: F(2,123) = 1.818, p = 0.167
-Romance: F(2,123) = 0.405, p = 0.668
-Romance: F(2,123) = 0.423, p = 0.656
+Adventure: F(2,113) = 1.433, p = 0.243, η² = 0.025, ηp² = 0.025
+Romance: F(2,123) = 0.671, p = 0.513, η² = 0.011, ηp² = 0.011
+Romance: F(2,123) = 1.818, p = 0.167, η² = 0.029, ηp² = 0.029
+Romance: F(2,123) = 0.405, p = 0.668, η² = 0.007, ηp² = 0.007
+Romance: F(2,123) = 0.423, p = 0.656, η² = 0.007, ηp² = 0.007
+```
+
+**Group Statistics with 95% Confidence Intervals:**
+```
+[Group means are reported with 95% CI in the full HTML report]
 ```
 
 
@@ -42,10 +73,12 @@ There were no significant differences in recall performance across conditions in
 
 **Reading Time and Engagement Results (Romance Story):**
 ```
-Transportation Score: F(2,123) = 1.818, p = 0.167
-Average Reading Time per Story Sentence: F(2,123) = 0.405, p = 0.668
-Overall Reading Time for Entire Story-Path: F(2,123) = 0.423, p = 0.656
+Transportation Score: F(2,123) = 1.818, p = 0.167, η² = 0.029, ηp² = 0.029
+Average Reading Time per Story Sentence: F(2,123) = 0.405, p = 0.668, η² = 0.007, ηp² = 0.007
+Overall Reading Time for Entire Story-Path: F(2,123) = 0.423, p = 0.656, η² = 0.007, ηp² = 0.007
 ```
+
+**Note**: Group means with 95% confidence intervals are reported in the full HTML report for all conditions.
 
 
 For the Romance story, we additionally recorded the reading time for each subject and measured individual
@@ -95,34 +128,34 @@ i.e., the Pearson correlation between each pair of participants' recall performa
 
 **64 Shared Events - One-sample t-tests (Raw values):**
 ```
-FREE: mean r = 0.136, t(152) = 11.746, p = 0.000000
-YOKE: mean r = 0.226, t(1377) = 58.288, p = 0.000000
-PASV: mean r = 0.249, t(1484) = 70.871, p = 0.000000
+FREE: mean r = 0.136, 95% CI = [0.113, 0.159], t(152) = 11.746, p = 0.000000, d = 0.950
+YOKE: mean r = 0.226, 95% CI = [0.220, 0.232], t(1377) = 58.288, p = 0.000000, d = 1.570
+PASV: mean r = 0.249, 95% CI = [0.243, 0.255], t(1484) = 70.871, p = 0.000000, d = 1.840
 ```
 
 **64 Shared Events - ANOVA (Raw values):**
 ```
-F(2,3013) = 48.127, p = 0.000000
+F(2,3013) = 48.127, p = 0.000000, η² = 0.031, ηp² = 0.031
 **Post-hoc t-tests:**
-Free vs Yoked: t(1529.000) = -7.285, p = 0.000000
-Free vs Passive: t(1636.000) = -9.731, p = 0.000000
-Yoked vs Passive: t(2861.000) = -4.463, p = 0.000008
+Free vs Yoked: t(1529.000) = -7.285, p = 0.000000, d = -0.372, 95% CI for mean difference = [-0.115, -0.065]
+Free vs Passive: t(1636.000) = -9.731, p = 0.000000, d = -0.497, 95% CI for mean difference = [-0.139, -0.087]
+Yoked vs Passive: t(2861.000) = -4.463, p = 0.000008, d = -0.228, 95% CI for mean difference = [-0.033, -0.013]
 ```
 
 **49 Non-Choice Events - One-sample t-tests (Raw values):**
 ```
-FREE: mean r = 0.157, t(152) = 13.212, p = 0.000000
-YOKE: mean r = 0.219, t(1377) = 51.429, p = 0.000000
-PASV: mean r = 0.229, t(1484) = 59.028, p = 0.000000
+FREE: mean r = 0.157, 95% CI = [0.133, 0.181], t(152) = 13.212, p = 0.000000, d = 1.070
+YOKE: mean r = 0.219, 95% CI = [0.213, 0.225], t(1377) = 51.429, p = 0.000000, d = 1.390
+PASV: mean r = 0.229, 95% CI = [0.223, 0.235], t(1484) = 59.028, p = 0.000000, d = 1.530
 ```
 
 **49 Non-Choice Events - ANOVA (Raw values):**
 ```
-F(2,3013) = 15.445, p = 0.000000
+F(2,3013) = 15.445, p = 0.000000, η² = 0.010, ηp² = 0.010
 **Post-hoc t-tests:**
-Free vs Yoked: t(1529.000) = -4.632, p = 0.000004
-Free vs Passive: t(1636.000) = -5.679, p = 0.000000
-Yoked vs Passive: t(2861.000) = -1.739, p = 0.082
+Free vs Yoked: t(1529.000) = -4.632, p = 0.000004, d = -0.237, 95% CI for mean difference = [-0.088, -0.036]
+Free vs Passive: t(1636.000) = -5.679, p = 0.000000, d = -0.290, 95% CI for mean difference = [-0.097, -0.045]
+Yoked vs Passive: t(2861.000) = -1.739, p = 0.082, d = -0.089, 95% CI for mean difference = [-0.021, 0.001]
 ```
 
 **64 Shared Events - One-sample t-tests (Fisher z-transformed):**
@@ -223,16 +256,16 @@ i.e., "Choice ISC".
 
 **Choice ISC Results (Raw values):**
 ```
-FREE: mean r = 0.208, t(152) = 9.548, p = 0.000000
-YOKE: mean r = 0.255, t(1377) = 36.193, p = 0.000000
-Free vs Yoked: t = -2.105, p = 0.035
+FREE: mean r = 0.208, 95% CI = [0.166, 0.250], t(152) = 9.548, p = 0.000000, d = 0.772
+YOKE: mean r = 0.255, 95% CI = [0.241, 0.269], t(1377) = 36.193, p = 0.000000, d = 0.976
+Free vs Yoked: t = -2.105, p = 0.035, d = -0.107, 95% CI for mean difference = [-0.091, -0.003]
 ```
 
 **Choice ISC Results (Fisher z-transformed):**
 ```
-FREE: mean z = 0.233, t(152) = 9.133, p = 0.000000
-YOKE: mean z = 0.289, t(1377) = 31.175, p = 0.000000
-Free vs Yoked: t = -1.934, p = 0.053
+FREE: mean z = 0.233, 95% CI = [0.186, 0.280], t(152) = 9.133, p = 0.000000, d = 0.740
+YOKE: mean z = 0.289, 95% CI = [0.273, 0.305], t(1377) = 31.175, p = 0.000000, d = 0.840
+Free vs Yoked: t = -1.934, p = 0.053, d = -0.098, 95% CI for mean difference = [-0.112, 0.001]
 ```
 
 
@@ -310,18 +343,18 @@ semantic centrality and recall (an event-by-event vector of remembered=1, forgot
 
 **Semantic and Causal Centrality - One-sample t-tests (Raw values):**
 ```
-Adventure FREE Semantic: mean r = 0.223, t(21) = 5.582, p = 0.000015
-Adventure FREE Causal: mean r = 0.187, t(21) = 4.604, p = 0.000153
-Adventure YOKE Semantic: mean r = 0.323, t(44) = 16.071, p = 0.000000
-Adventure YOKE Causal: mean r = 0.159, t(44) = 5.453, p = 0.000002
-Adventure PASV Semantic: mean r = 0.308, t(48) = 12.681, p = 0.000000
-Adventure PASV Causal: mean r = 0.126, t(48) = 4.922, p = 0.000011
-Romance FREE Semantic: mean r = 0.146, t(17) = 6.109, p = 0.000012
-Romance FREE Causal: mean r = 0.213, t(17) = 8.613, p = 0.000000
-Romance YOKE Semantic: mean r = 0.221, t(52) = 19.021, p = 0.000000
-Romance YOKE Causal: mean r = 0.236, t(52) = 14.398, p = 0.000000
-Romance PASV Semantic: mean r = 0.265, t(54) = 20.003, p = 0.000000
-Romance PASV Causal: mean r = 0.244, t(54) = 23.988, p = 0.000000
+Adventure FREE Semantic: mean r = 0.223, 95% CI = [0.140, 0.306], t(21) = 5.582, p = 0.000015, d = 1.218
+Adventure FREE Causal: mean r = 0.187, 95% CI = [0.105, 0.269], t(21) = 4.604, p = 0.000153, d = 1.004
+Adventure YOKE Semantic: mean r = 0.323, 95% CI = [0.288, 0.358], t(44) = 16.071, p = 0.000000, d = 2.422
+Adventure YOKE Causal: mean r = 0.159, 95% CI = [0.099, 0.219], t(44) = 5.453, p = 0.000002, d = 0.822
+Adventure PASV Semantic: mean r = 0.308, 95% CI = [0.260, 0.356], t(48) = 12.681, p = 0.000000, d = 1.831
+Adventure PASV Causal: mean r = 0.126, 95% CI = [0.075, 0.177], t(48) = 4.922, p = 0.000011, d = 0.710
+Romance FREE Semantic: mean r = 0.146, 95% CI = [0.098, 0.194], t(17) = 6.109, p = 0.000012, d = 1.481
+Romance FREE Causal: mean r = 0.213, 95% CI = [0.164, 0.262], t(17) = 8.613, p = 0.000000, d = 2.088
+Romance YOKE Semantic: mean r = 0.221, 95% CI = [0.198, 0.244], t(52) = 19.021, p = 0.000000, d = 2.636
+Romance YOKE Causal: mean r = 0.236, 95% CI = [0.204, 0.268], t(52) = 14.398, p = 0.000000, d = 1.996
+Romance PASV Semantic: mean r = 0.265, 95% CI = [0.238, 0.292], t(54) = 20.003, p = 0.000000, d = 2.721
+Romance PASV Causal: mean r = 0.244, 95% CI = [0.224, 0.264], t(54) = 23.988, p = 0.000000, d = 3.264
 ```
 
 **Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):**
@@ -360,15 +393,15 @@ by Free participants, event content was matched across conditions; only the degr
 
 **Semantic Centrality - One-way ANOVA (Raw values):**
 ```
-Adventure: F(2.000,113) = 3.036, p = 0.052
+Adventure: F(2.000,113) = 3.036, p = 0.052, η² = 0.051, ηp² = 0.051
 **Post-hoc t-tests:**
-Adventure Free Vs Yoke: t(65) = -2.503, p = 0.015
-Adventure Free Vs Pasv: t(69) = -1.889, p = 0.063
-Romance: F(2.000,123) = 11.455, p = 0.000027
+Adventure Free Vs Yoke: t(65) = -2.503, p = 0.015, d = -0.616, 95% CI for mean difference = [-0.179, -0.021]
+Adventure Free Vs Pasv: t(69) = -1.889, p = 0.063, d = -0.451, 95% CI for mean difference = [-0.174, 0.004]
+Romance: F(2.000,123) = 11.455, p = 0.000027, η² = 0.157, ηp² = 0.157
 **Post-hoc t-tests:**
-Romance Free Vs Yoke: t(69) = -3.090, p = 0.0029
-Romance Free Vs Pasv: t(71) = -4.429, p = 0.000034
-Romance Yoke Vs Pasv: t(106) = -2.493, p = 0.014
+Romance Free Vs Yoke: t(69) = -3.090, p = 0.0029, d = -0.737, 95% CI for mean difference = [-0.123, -0.027]
+Romance Free Vs Pasv: t(71) = -4.429, p = 0.000034, d = -1.050, 95% CI for mean difference = [-0.170, -0.068]
+Romance Yoke Vs Pasv: t(106) = -2.493, p = 0.014, d = -0.478, 95% CI for mean difference = [-0.078, -0.010]
 ```
 
 **Semantic Centrality - One-way ANOVA (Fisher z-transformed):**
@@ -608,8 +641,8 @@ the denied choice events is selectively reduced compared to its choice-granted c
 
 **Agency Denial Effect - Two-sample t-test:**
 ```
-Adventure: p = 0.015
-Romance: p = 0.017
+Adventure: t(df) = [value], p = 0.015, d = [value], 95% CI for mean difference = [lower, upper]
+Romance: t(df) = [value], p = 0.017, d = [value], 95% CI for mean difference = [lower, upper]
 ```
 
 (**Adventure: p = 0.015**;
