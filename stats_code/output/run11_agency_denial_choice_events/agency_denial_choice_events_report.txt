@@ -17,6 +17,8 @@ Two-sample t-test: Denied Choice Events (Yoked not-want) vs Granted Choice Event
   Yoked not-want (denied) events: Mean = 0.3439, Std = 0.2479
   Free not-want (granted) events: Mean = 0.4848, Std = 0.2868
   t(88) = -2.4936, p = 0.014517
+  d = -0.526
+  95% CI for mean difference: [-0.253, -0.029]
   Result: Significant difference (p < 0.05)
 
 For comparison - Want events:
@@ -38,6 +40,8 @@ Two-sample t-test: Denied Choice Events (Yoked not-want) vs Granted Choice Event
   Yoked not-want (denied) events: Mean = 0.2781, Std = 0.1954
   Free not-want (granted) events: Mean = 0.3807, Std = 0.2363
   t(104) = -2.4366, p = 0.016526
+  d = -0.473
+  95% CI for mean difference: [-0.186, -0.019]
   Result: Significant difference (p < 0.05)
 
 For comparison - Want events:

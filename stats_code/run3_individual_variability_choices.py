@@ -22,6 +22,8 @@ import os
 from scipy.stats import pearsonr, ttest_1samp, ttest_ind
 from scipy import stats
 from data_structure import RecallDataLoader
+from effect_size_utils import (calculate_ci_mean, cohens_d_one_sample, cohens_d_two_sample,
+                             format_ci, format_cohens_d)
 
 def get_shared_choice_base_scenes():
     """Get the 15 unique base scene numbers for shared choice events"""
@@ -247,6 +249,10 @@ def run_analysis(condition, shared_choice_base_scenes, base_path, use_z_transfor
     std_val = np.std(correlations, ddof=1)
     n = len(correlations)
     
+    # Calculate 95% CI and Cohen's d
+    ci_lower, ci_upper, _ = calculate_ci_mean(correlations)
+    cohens_d = cohens_d_one_sample(correlations, test_value=0)
+    
     results = {
         'values': correlations,
         'mean': mean_val,
@@ -254,6 +260,9 @@ def run_analysis(condition, shared_choice_base_scenes, base_path, use_z_transfor
         'n': n,
         't_stat': t_stat,
         'p_val': p_val,
+        'ci_lower': ci_lower,
+        'ci_upper': ci_upper,
+        'cohens_d': cohens_d,
         'choice_vectors': choice_vectors,
         'subject_pairs': subject_pairs
     }
@@ -311,6 +320,18 @@ def analyze_choice_isc():
             yoke_vals = results['yoke']['values']
             
             t_stat, p_val = ttest_ind(free_vals, yoke_vals)
+            cohens_d = cohens_d_two_sample(free_vals, yoke_vals)
+            
+            # Calculate CI for mean difference
+            mean_diff = results['free']['mean'] - results['yoke']['mean']
+            pooled_std = np.sqrt(((len(free_vals) - 1) * np.var(free_vals, ddof=1) + 
+                                  (len(yoke_vals) - 1) * np.var(yoke_vals, ddof=1)) / 
+                                 (len(free_vals) + len(yoke_vals) - 2))
+            sem_diff = pooled_std * np.sqrt(1/len(free_vals) + 1/len(yoke_vals))
+            df = len(free_vals) + len(yoke_vals) - 2
+            t_critical = stats.t.ppf(0.975, df=df)
+            ci_lower = mean_diff - t_critical * sem_diff
+            ci_upper = mean_diff + t_critical * sem_diff
             
             results['free_vs_yoke'] = {
                 't_stat': t_stat,
@@ -318,7 +339,10 @@ def analyze_choice_isc():
                 'free_mean': results['free']['mean'],
                 'yoke_mean': results['yoke']['mean'],
                 'free_n': results['free']['n'],
-                'yoke_n': results['yoke']['n']
+                'yoke_n': results['yoke']['n'],
+                'cohens_d': cohens_d,
+                'mean_diff_ci_lower': ci_lower,
+                'mean_diff_ci_upper': ci_upper
             }
             
             print("\n" + "="*80)
@@ -395,7 +419,10 @@ def analyze_choice_isc():
                     'Mean': results[condition]['mean'],
                     'Std': results[condition]['std'],
                     't_statistic': results[condition]['t_stat'],
-                    'p_value': results[condition]['p_val']
+                    'p_value': results[condition]['p_val'],
+                    'ci_lower': results[condition].get('ci_lower', np.nan),
+                    'ci_upper': results[condition].get('ci_upper', np.nan),
+                    'cohens_d': results[condition].get('cohens_d', np.nan)
                 })
         
         # Add comparison
@@ -407,7 +434,10 @@ def analyze_choice_isc():
                 'Mean': f"{results['free_vs_yoke']['free_mean']:.4f} vs {results['free_vs_yoke']['yoke_mean']:.4f}",
                 'Std': '',
                 't_statistic': results['free_vs_yoke']['t_stat'],
-                'p_value': results['free_vs_yoke']['p_val']
+                'p_value': results['free_vs_yoke']['p_val'],
+                'ci_lower': results['free_vs_yoke'].get('mean_diff_ci_lower', np.nan),
+                'ci_upper': results['free_vs_yoke'].get('mean_diff_ci_upper', np.nan),
+                'cohens_d': results['free_vs_yoke'].get('cohens_d', np.nan)
             })
     
     summary_df = pd.DataFrame(summary_data)
@@ -444,10 +474,14 @@ def analyze_choice_isc():
                 report_lines.append(f"  N pairs: {r['n']}")
                 report_lines.append(f"  Mean {val_type}: {r['mean']:.4f}")
                 report_lines.append(f"  Std: {r['std']:.4f}")
+                ci_str = format_ci(r.get('ci_lower', np.nan), r.get('ci_upper', np.nan))
+                report_lines.append(f"  95% CI: {ci_str}")
                 report_lines.append(f"  Min {val_type}: {np.min(r['values']):.4f}")
                 report_lines.append(f"  Max {val_type}: {np.max(r['values']):.4f}")
                 report_lines.append(f"  One-sample t-test (vs 0):")
                 report_lines.append(f"    t({r['n']-1}) = {r['t_stat']:.4f}, p = {r['p_val']:.6f}")
+                if not np.isnan(r.get('cohens_d', np.nan)):
+                    report_lines.append(f"    {format_cohens_d(r['cohens_d'])}")
                 if r['p_val'] < 0.001:
                     report_lines.append(f"    Result: Choice ISC is significantly above zero (p < 0.001)")
                 elif r['p_val'] < 0.01:
@@ -466,6 +500,10 @@ def analyze_choice_isc():
             report_lines.append(f"  Yoke mean {val_type}: {comp['yoke_mean']:.4f} (N={comp['yoke_n']})")
             report_lines.append(f"  Two-sample t-test:")
             report_lines.append(f"    t = {comp['t_stat']:.4f}, p = {comp['p_val']:.6f}")
+            if not np.isnan(comp.get('cohens_d', np.nan)):
+                report_lines.append(f"    {format_cohens_d(comp['cohens_d'])}")
+            ci_str = format_ci(comp.get('mean_diff_ci_lower', np.nan), comp.get('mean_diff_ci_upper', np.nan))
+            report_lines.append(f"    95% CI for mean difference: {ci_str}")
             if comp['p_val'] < 0.001:
                 report_lines.append(f"    Result: Significant difference (p < 0.001)")
             elif comp['p_val'] < 0.01:

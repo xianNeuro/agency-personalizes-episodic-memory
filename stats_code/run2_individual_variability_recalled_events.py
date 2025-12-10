@@ -22,6 +22,8 @@ import os
 from scipy.stats import pearsonr, ttest_1samp, norm, f_oneway
 from scipy import stats
 from data_structure import RecallDataLoader
+from effect_size_utils import (calculate_ci_mean, cohens_d_one_sample, cohens_d_two_sample,
+                             calculate_anova_effect_sizes, format_ci, format_cohens_d)
 
 def load_monthy_map():
     """Load the story map from romance_data1.xlsx to identify shared events"""
@@ -374,13 +376,17 @@ def perform_one_sample_ttest(data, test_value=0):
     """Perform 1-sample t-test against test_value"""
     data_clean = data[~np.isnan(data)]
     if len(data_clean) < 2:
-        return None, None, None, len(data_clean)
+        return None, None, None, len(data_clean), None, None, None
     
     t_stat, p_val = ttest_1samp(data_clean, test_value)
     mean_val = np.mean(data_clean)
     std_val = np.std(data_clean, ddof=1)
     
-    return t_stat, p_val, mean_val, len(data_clean)
+    # Calculate 95% CI and Cohen's d
+    ci_lower, ci_upper, _ = calculate_ci_mean(data_clean)
+    cohens_d = cohens_d_one_sample(data_clean, test_value)
+    
+    return t_stat, p_val, mean_val, len(data_clean), ci_lower, ci_upper, cohens_d
 
 def perform_anova_across_conditions(all_results):
     """Perform one-way ANOVA across conditions"""
@@ -408,13 +414,28 @@ def perform_anova_across_conditions(all_results):
     df_between = n_groups - 1
     df_within = n_total - n_groups
     
+    # Calculate effect sizes (approximate using group means and variances)
+    # For eta-squared, we need SS_between and SS_total
+    all_data = np.concatenate(condition_data)
+    grand_mean = np.mean(all_data)
+    ss_total = np.sum((all_data - grand_mean)**2)
+    
+    group_means = [np.mean(d) for d in condition_data]
+    group_ns = [len(d) for d in condition_data]
+    ss_between = sum(n * (mean - grand_mean)**2 for n, mean in zip(group_ns, group_means))
+    
+    eta_sq = ss_between / ss_total if ss_total > 0 else np.nan
+    partial_eta_sq = ss_between / (ss_between + (ss_total - ss_between)) if (ss_between + (ss_total - ss_between)) > 0 else np.nan
+    
     return {
         'f_stat': f_stat,
         'p_value': p_val,
         'df_between': df_between,
         'df_within': df_within,
         'n_total': n_total,
-        'n_groups': n_groups
+        'n_groups': n_groups,
+        'eta_squared': eta_sq,
+        'partial_eta_squared': partial_eta_sq
     }
 
 def perform_posthoc_tests(all_results):
@@ -428,12 +449,28 @@ def perform_posthoc_tests(all_results):
         yoke_corrs = all_results['yoke']['correlations']
         
         t_stat, p_val = stats.ttest_ind(free_corrs, yoke_corrs)
+        cohens_d = cohens_d_two_sample(free_corrs, yoke_corrs)
+        
+        # Calculate CI for mean difference
+        mean_diff = np.mean(free_corrs) - np.mean(yoke_corrs)
+        pooled_std = np.sqrt(((len(free_corrs) - 1) * np.var(free_corrs, ddof=1) + 
+                              (len(yoke_corrs) - 1) * np.var(yoke_corrs, ddof=1)) / 
+                             (len(free_corrs) + len(yoke_corrs) - 2))
+        sem_diff = pooled_std * np.sqrt(1/len(free_corrs) + 1/len(yoke_corrs))
+        df = len(free_corrs) + len(yoke_corrs) - 2
+        t_critical = stats.t.ppf(0.975, df=df)
+        ci_lower = mean_diff - t_critical * sem_diff
+        ci_upper = mean_diff + t_critical * sem_diff
+        
         results.append({
             'comparison': 'Free vs Yoked',
             't_stat': t_stat,
             'p_value': p_val,
             'n_free': len(free_corrs),
-            'n_yoke': len(yoke_corrs)
+            'n_yoke': len(yoke_corrs),
+            'cohens_d': cohens_d,
+            'mean_diff_ci_lower': ci_lower,
+            'mean_diff_ci_upper': ci_upper
         })
     
     # Free vs Passive
@@ -442,12 +479,28 @@ def perform_posthoc_tests(all_results):
         pasv_corrs = all_results['pasv']['correlations']
         
         t_stat, p_val = stats.ttest_ind(free_corrs, pasv_corrs)
+        cohens_d = cohens_d_two_sample(free_corrs, pasv_corrs)
+        
+        # Calculate CI for mean difference
+        mean_diff = np.mean(free_corrs) - np.mean(pasv_corrs)
+        pooled_std = np.sqrt(((len(free_corrs) - 1) * np.var(free_corrs, ddof=1) + 
+                              (len(pasv_corrs) - 1) * np.var(pasv_corrs, ddof=1)) / 
+                             (len(free_corrs) + len(pasv_corrs) - 2))
+        sem_diff = pooled_std * np.sqrt(1/len(free_corrs) + 1/len(pasv_corrs))
+        df = len(free_corrs) + len(pasv_corrs) - 2
+        t_critical = stats.t.ppf(0.975, df=df)
+        ci_lower = mean_diff - t_critical * sem_diff
+        ci_upper = mean_diff + t_critical * sem_diff
+        
         results.append({
             'comparison': 'Free vs Passive',
             't_stat': t_stat,
             'p_value': p_val,
             'n_free': len(free_corrs),
-            'n_pasv': len(pasv_corrs)
+            'n_pasv': len(pasv_corrs),
+            'cohens_d': cohens_d,
+            'mean_diff_ci_lower': ci_lower,
+            'mean_diff_ci_upper': ci_upper
         })
     
     # Yoked vs Passive
@@ -456,12 +509,28 @@ def perform_posthoc_tests(all_results):
         pasv_corrs = all_results['pasv']['correlations']
         
         t_stat, p_val = stats.ttest_ind(yoke_corrs, pasv_corrs)
+        cohens_d = cohens_d_two_sample(yoke_corrs, pasv_corrs)
+        
+        # Calculate CI for mean difference
+        mean_diff = np.mean(yoke_corrs) - np.mean(pasv_corrs)
+        pooled_std = np.sqrt(((len(yoke_corrs) - 1) * np.var(yoke_corrs, ddof=1) + 
+                              (len(pasv_corrs) - 1) * np.var(pasv_corrs, ddof=1)) / 
+                             (len(yoke_corrs) + len(pasv_corrs) - 2))
+        sem_diff = pooled_std * np.sqrt(1/len(yoke_corrs) + 1/len(pasv_corrs))
+        df = len(yoke_corrs) + len(pasv_corrs) - 2
+        t_critical = stats.t.ppf(0.975, df=df)
+        ci_lower = mean_diff - t_critical * sem_diff
+        ci_upper = mean_diff + t_critical * sem_diff
+        
         results.append({
             'comparison': 'Yoked vs Passive',
             't_stat': t_stat,
             'p_value': p_val,
             'n_yoke': len(yoke_corrs),
-            'n_pasv': len(pasv_corrs)
+            'n_pasv': len(pasv_corrs),
+            'cohens_d': cohens_d,
+            'mean_diff_ci_lower': ci_lower,
+            'mean_diff_ci_upper': ci_upper
         })
     
     return results
@@ -510,7 +579,7 @@ def run_analysis(loader, converge_dict, shared_choice_mask, use_nonchoice_only=F
         correlations = isc_data['correlations']
         
         # Perform 1-sample t-test on correlations
-        t_stat, p_val, mean_val, n = perform_one_sample_ttest(correlations, test_value=0)
+        t_stat, p_val, mean_val, n, ci_lower, ci_upper, cohens_d = perform_one_sample_ttest(correlations, test_value=0)
         
         if t_stat is not None:
             std_val = np.std(correlations[~np.isnan(correlations)], ddof=1)
@@ -522,7 +591,10 @@ def run_analysis(loader, converge_dict, shared_choice_mask, use_nonchoice_only=F
                 'std': std_val,
                 't_stat': t_stat,
                 'df': n - 1,
-                'p_value': p_val
+                'p_value': p_val,
+                'ci_lower': ci_lower,
+                'ci_upper': ci_upper,
+                'cohens_d': cohens_d
             })
     
     # Perform ANOVA across conditions
@@ -685,6 +757,9 @@ def generate_report(all_analyses, output_file):
                 t_stat = stat['t_stat']
                 df = stat['df']
                 p_val = stat['p_value']
+                ci_lower = stat.get('ci_lower', np.nan)
+                ci_upper = stat.get('ci_upper', np.nan)
+                cohens_d = stat.get('cohens_d', np.nan)
                 
                 if p_val < 0.001:
                     p_text = "p < 0.001"
@@ -694,7 +769,12 @@ def generate_report(all_analyses, output_file):
                 f.write(f"{cond} condition:\n")
                 f.write(f"  N pairs = {n}\n")
                 f.write(f"  Mean = {mean_val:.4f}\n")
-                f.write(f"  t({df}) = {t_stat:.4f}, {p_text}\n\n")
+                ci_str = format_ci(ci_lower, ci_upper)
+                f.write(f"  95% CI = {ci_str}\n")
+                f.write(f"  t({df}) = {t_stat:.4f}, {p_text}\n")
+                if not np.isnan(cohens_d):
+                    f.write(f"  {format_cohens_d(cohens_d)}\n")
+                f.write("\n")
             
             # ANOVA
             if analysis['anova_results']:
@@ -704,13 +784,20 @@ def generate_report(all_analyses, output_file):
                 p_val = anova['p_value']
                 df_between = int(anova['df_between'])
                 df_within = int(anova['df_within'])
+                eta_sq = anova.get('eta_squared', np.nan)
+                partial_eta_sq = anova.get('partial_eta_squared', np.nan)
                 
                 if p_val < 0.001:
                     p_text = "p < 0.001"
                 else:
                     p_text = f"p = {p_val:.3f}"
                 
-                f.write(f"  F({df_between},{df_within}) = {f_stat:.4f}, {p_text}\n\n")
+                f.write(f"  F({df_between},{df_within}) = {f_stat:.4f}, {p_text}\n")
+                if not np.isnan(eta_sq):
+                    f.write(f"  η² = {eta_sq:.4f}\n")
+                if not np.isnan(partial_eta_sq):
+                    f.write(f"  ηp² = {partial_eta_sq:.4f}\n")
+                f.write("\n")
             
             # Post-hoc tests
             if analysis['posthoc_results']:
@@ -719,6 +806,9 @@ def generate_report(all_analyses, output_file):
                     comparison = posthoc['comparison']
                     t_stat = posthoc['t_stat']
                     p_val = posthoc['p_value']
+                    cohens_d = posthoc.get('cohens_d', np.nan)
+                    ci_lower = posthoc.get('mean_diff_ci_lower', np.nan)
+                    ci_upper = posthoc.get('mean_diff_ci_upper', np.nan)
                     
                     if p_val < 0.001:
                         p_text = "p < 0.001"
@@ -726,7 +816,13 @@ def generate_report(all_analyses, output_file):
                         p_text = f"p = {p_val:.3f}"
                     
                     f.write(f"{comparison}:\n")
-                    f.write(f"  t = {t_stat:.4f}, {p_text}\n\n")
+                    f.write(f"  t = {t_stat:.4f}, {p_text}\n")
+                    if not np.isnan(cohens_d):
+                        f.write(f"  {format_cohens_d(cohens_d)}\n")
+                    if not np.isnan(ci_lower) and not np.isnan(ci_upper):
+                        ci_str = format_ci(ci_lower, ci_upper)
+                        f.write(f"  95% CI for mean difference = {ci_str}\n")
+                    f.write("\n")
             
             f.write("\n")
         

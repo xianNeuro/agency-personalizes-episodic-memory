@@ -12,6 +12,7 @@ import numpy as np
 import re
 from datetime import datetime
 from data_structure import RecallDataLoader
+from effect_size_utils import format_ci, format_cohens_d
 
 # Make loader available globally for stats extraction
 loader = None
@@ -565,9 +566,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 df_val = row.get('df', n-1 if pd.notna(n) else '')
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition}: mean r = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             html.append("</div>")
         
         # Get ANOVA results from separate file
@@ -597,7 +605,13 @@ def generate_html_report(stats):
                                 html.append("<br><strong>Post-hoc t-tests:</strong><br>")
                                 for test in posthoc_tests:
                                     html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
-                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
+                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}")
+                                    if 'cohens_d' in test and not pd.isna(test.get('cohens_d')):
+                                        html.append(f", {format_cohens_d(test['cohens_d'])}")
+                                    if 'mean_diff_ci_lower' in test and not pd.isna(test.get('mean_diff_ci_lower')):
+                                        ci_str = format_ci(test.get('mean_diff_ci_lower'), test.get('mean_diff_ci_upper'))
+                                        html.append(f", 95% CI for mean difference = {ci_str}")
+                                    html.append("<br>")
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -613,9 +627,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 df_val = row.get('df', n-1 if pd.notna(n) else '')
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition}: mean r = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             html.append("</div>")
         
         # Get ANOVA for analysis 2
@@ -661,9 +682,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 df_val = row.get('df', n-1 if pd.notna(n) else '')
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition}: mean z = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             html.append("</div>")
         
         # Get ANOVA for analysis 3
@@ -709,9 +737,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 df_val = row.get('df', n-1 if pd.notna(n) else '')
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition}: mean z = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             html.append("</div>")
         
         # Get ANOVA for analysis 4
@@ -829,13 +864,28 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N_pairs', '')
                 df_val = n-1 if pd.notna(n) else ''
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition_upper}: mean r = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             elif condition == 'Free_vs_Yoke' and analysis == 'raw':
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
-                html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
+                html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                if not pd.isna(ci_lower):
+                    html.append(f", 95% CI for mean difference = {format_ci(ci_lower, ci_upper)}")
+                html.append("<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Choice ISC Results (Fisher z-transformed):</strong><br>""")
@@ -849,13 +899,28 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N_pairs', '')
                 df_val = n-1 if pd.notna(n) else ''
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
                 html.append(f"{condition_upper}: mean z = {format_stat_value(mean_r)}, "
+                          f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                           f"t({format_stat_value(df_val)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                html.append("<br>")
             elif condition == 'Free_vs_Yoke' and analysis == 'z_transformed':
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
-                html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}<br>")
+                ci_lower = row.get('ci_lower', np.nan)
+                ci_upper = row.get('ci_upper', np.nan)
+                cohens_d = row.get('cohens_d', np.nan)
+                html.append(f"Free vs Yoked: t = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}")
+                if not pd.isna(cohens_d):
+                    html.append(f", {format_cohens_d(cohens_d)}")
+                if not pd.isna(ci_lower):
+                    html.append(f", 95% CI for mean difference = {format_ci(ci_lower, ci_upper)}")
+                html.append("<br>")
         html.append("</div>")
     
     html.append("""
@@ -953,9 +1018,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 if pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n):
+                    ci_lower = row.get('ci_lower', np.nan)
+                    ci_upper = row.get('ci_upper', np.nan)
+                    cohens_d = row.get('cohens_d', np.nan)
                     html.append(f"{story} {condition} {measure}: mean r = {format_stat_value(mean_val)}, "
+                              f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                               f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                              f"p = {format_stat_value(p_val)}<br>")
+                              f"p = {format_stat_value(p_val)}")
+                    if not pd.isna(cohens_d):
+                        html.append(f", {format_cohens_d(cohens_d)}")
+                    html.append("<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Semantic and Causal Centrality - One-sample t-tests (Fisher z-transformed):</strong><br>""")
@@ -970,9 +1042,16 @@ def generate_html_report(stats):
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
                 if pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n):
+                    ci_lower = row.get('ci_lower', np.nan)
+                    ci_upper = row.get('ci_upper', np.nan)
+                    cohens_d = row.get('cohens_d', np.nan)
                     html.append(f"{story} {condition} {measure}: mean z = {format_stat_value(mean_val)}, "
+                              f"95% CI = {format_ci(ci_lower, ci_upper)}, "
                               f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                              f"p = {format_stat_value(p_val)}<br>")
+                              f"p = {format_stat_value(p_val)}")
+                    if not pd.isna(cohens_d):
+                        html.append(f", {format_cohens_d(cohens_d)}")
+                    html.append("<br>")
         html.append("</div>")
     
     html.append("""

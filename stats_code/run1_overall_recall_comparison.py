@@ -11,6 +11,7 @@ from scipy import stats
 from statsmodels.stats.anova import anova_lm
 from statsmodels.formula.api import ols
 from data_structure import RecallDataLoader
+from effect_size_utils import calculate_anova_effect_sizes, calculate_ci_mean, format_ci
 
 def load_overall_recall_data():
     """Load overall recall data for both stories"""
@@ -77,14 +78,29 @@ def perform_oneway_anova(df_data, story_name):
     # Calculate group means and standard deviations
     group_stats = df_combined.groupby('condition')['overall_rcl'].agg(['mean', 'std', 'count'])
     
+    # Calculate effect sizes
+    effect_sizes = calculate_anova_effect_sizes(anova_table)
+    
+    # Calculate confidence intervals for group means
+    group_ci = {}
+    for cond in group_stats.index:
+        cond_data = df_combined[df_combined['condition'] == cond]['overall_rcl'].values
+        ci_lower, ci_upper, mean_val = calculate_ci_mean(cond_data)
+        group_ci[cond] = {'ci_lower': ci_lower, 'ci_upper': ci_upper, 'mean': mean_val}
+    
     print(f"\n{story_name} Story - One-Way ANOVA Results:")
     print(f"  F({df_between},{df_within}) = {f_stat:.3f}, p = {p_value:.3f}")
+    if 'eta_squared' in effect_sizes:
+        print(f"  η² = {effect_sizes['eta_squared']:.4f}")
+    if 'partial_eta_squared' in effect_sizes:
+        print(f"  ηp² = {effect_sizes['partial_eta_squared']:.4f}")
     print(f"\nGroup Statistics:")
     for cond in sorted(group_stats.index):
         mean_val = group_stats.loc[cond, 'mean']
         std_val = group_stats.loc[cond, 'std']
         n_val = int(group_stats.loc[cond, 'count'])
-        print(f"    {cond}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}")
+        ci_str = format_ci(group_ci[cond]['ci_lower'], group_ci[cond]['ci_upper'])
+        print(f"    {cond}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}")
     
     return {
         'f_stat': f_stat,
@@ -92,6 +108,8 @@ def perform_oneway_anova(df_data, story_name):
         'df_within': df_within,
         'p_value': p_value,
         'group_stats': group_stats,
+        'group_ci': group_ci,
+        'effect_sizes': effect_sizes,
         'anova_table': anova_table
     }
 
@@ -112,6 +130,7 @@ def generate_report(results_ba, results_mv, engagement_results, output_file):
         
         # Group statistics
         group_stats_ba = results_ba['group_stats']
+        group_ci_ba = results_ba.get('group_ci', {})
         f.write("Group Means and Standard Deviations:\n")
         for condition in ['free', 'pasv', 'yoke']:
             if condition in group_stats_ba.index:
@@ -119,16 +138,23 @@ def generate_report(results_ba, results_mv, engagement_results, output_file):
                 std_val = group_stats_ba.loc[condition, 'std']
                 n_val = int(group_stats_ba.loc[condition, 'count'])
                 cond_name = {'free': 'Free', 'pasv': 'Passive', 'yoke': 'Yoked'}[condition]
-                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}\n")
+                ci_str = format_ci(group_ci_ba.get(condition, {}).get('ci_lower'), 
+                                   group_ci_ba.get(condition, {}).get('ci_upper')) if condition in group_ci_ba else "N/A"
+                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}\n")
         
         # ANOVA results
         f_stat_ba = results_ba['f_stat']
         df_between_ba = results_ba['df_between']
         df_within_ba = results_ba['df_within']
         p_val_ba = results_ba['p_value']
+        effect_sizes_ba = results_ba.get('effect_sizes', {})
         
         f.write(f"\nOne-Way ANOVA:\n")
         f.write(f"  F({df_between_ba},{df_within_ba}) = {f_stat_ba:.3f}, p = {p_val_ba:.3f}\n")
+        if 'eta_squared' in effect_sizes_ba:
+            f.write(f"  η² = {effect_sizes_ba['eta_squared']:.4f}\n")
+        if 'partial_eta_squared' in effect_sizes_ba:
+            f.write(f"  ηp² = {effect_sizes_ba['partial_eta_squared']:.4f}\n")
         
         # Interpret significance
         if p_val_ba < 0.001:
@@ -146,6 +172,7 @@ def generate_report(results_ba, results_mv, engagement_results, output_file):
         
         # Group statistics
         group_stats_mv = results_mv['group_stats']
+        group_ci_mv = results_mv.get('group_ci', {})
         f.write("Group Means and Standard Deviations:\n")
         for condition in ['free', 'pasv', 'yoke']:
             if condition in group_stats_mv.index:
@@ -153,16 +180,23 @@ def generate_report(results_ba, results_mv, engagement_results, output_file):
                 std_val = group_stats_mv.loc[condition, 'std']
                 n_val = int(group_stats_mv.loc[condition, 'count'])
                 cond_name = {'free': 'Free', 'pasv': 'Passive', 'yoke': 'Yoked'}[condition]
-                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}\n")
+                ci_str = format_ci(group_ci_mv.get(condition, {}).get('ci_lower'), 
+                                   group_ci_mv.get(condition, {}).get('ci_upper')) if condition in group_ci_mv else "N/A"
+                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}\n")
         
         # ANOVA results
         f_stat_mv = results_mv['f_stat']
         df_between_mv = results_mv['df_between']
         df_within_mv = results_mv['df_within']
         p_val_mv = results_mv['p_value']
+        effect_sizes_mv = results_mv.get('effect_sizes', {})
         
         f.write(f"\nOne-Way ANOVA:\n")
         f.write(f"  F({df_between_mv},{df_within_mv}) = {f_stat_mv:.3f}, p = {p_val_mv:.3f}\n")
+        if 'eta_squared' in effect_sizes_mv:
+            f.write(f"  η² = {effect_sizes_mv['eta_squared']:.4f}\n")
+        if 'partial_eta_squared' in effect_sizes_mv:
+            f.write(f"  ηp² = {effect_sizes_mv['partial_eta_squared']:.4f}\n")
         
         # Interpret significance
         if p_val_mv < 0.001:
@@ -190,64 +224,91 @@ def generate_report(results_ba, results_mv, engagement_results, output_file):
         trans_result = engagement_results['trans_score']
         f.write("TRANSPORTATION SCORE:\n")
         group_stats = trans_result['group_stats']
+        group_ci = trans_result.get('group_ci', {})
         for condition in ['free', 'pasv', 'yoke']:
             if condition in group_stats.index:
                 mean_val = group_stats.loc[condition, 'mean']
                 std_val = group_stats.loc[condition, 'std']
                 n_val = int(group_stats.loc[condition, 'count'])
                 cond_name = {'free': 'Free', 'pasv': 'Passive', 'yoke': 'Yoked'}[condition]
-                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}\n")
+                ci_str = format_ci(group_ci.get(condition, {}).get('ci_lower'), 
+                                   group_ci.get(condition, {}).get('ci_upper')) if condition in group_ci else "N/A"
+                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}\n")
         f_stat = trans_result['f_stat']
         df_between = trans_result['df_between']
         df_within = trans_result['df_within']
         p_val = trans_result['p_value']
+        effect_sizes = trans_result.get('effect_sizes', {})
         if p_val < 0.001:
             p_text = "p < 0.001"
         else:
             p_text = f"p = {p_val:.3f}"
-        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n\n")
+        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n")
+        if 'eta_squared' in effect_sizes:
+            f.write(f"  η² = {effect_sizes['eta_squared']:.4f}\n")
+        if 'partial_eta_squared' in effect_sizes:
+            f.write(f"  ηp² = {effect_sizes['partial_eta_squared']:.4f}\n")
+        f.write("\n")
         
         # Average reading time per sentence
         avg_result = engagement_results['avg_sent_readtime']
         f.write("AVERAGE READING TIME PER STORY SENTENCE:\n")
         group_stats = avg_result['group_stats']
+        group_ci = avg_result.get('group_ci', {})
         for condition in ['free', 'pasv', 'yoke']:
             if condition in group_stats.index:
                 mean_val = group_stats.loc[condition, 'mean']
                 std_val = group_stats.loc[condition, 'std']
                 n_val = int(group_stats.loc[condition, 'count'])
                 cond_name = {'free': 'Free', 'pasv': 'Passive', 'yoke': 'Yoked'}[condition]
-                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}\n")
+                ci_str = format_ci(group_ci.get(condition, {}).get('ci_lower'), 
+                                   group_ci.get(condition, {}).get('ci_upper')) if condition in group_ci else "N/A"
+                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}\n")
         f_stat = avg_result['f_stat']
         df_between = avg_result['df_between']
         df_within = avg_result['df_within']
         p_val = avg_result['p_value']
+        effect_sizes = avg_result.get('effect_sizes', {})
         if p_val < 0.001:
             p_text = "p < 0.001"
         else:
             p_text = f"p = {p_val:.3f}"
-        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n\n")
+        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n")
+        if 'eta_squared' in effect_sizes:
+            f.write(f"  η² = {effect_sizes['eta_squared']:.4f}\n")
+        if 'partial_eta_squared' in effect_sizes:
+            f.write(f"  ηp² = {effect_sizes['partial_eta_squared']:.4f}\n")
+        f.write("\n")
         
         # Total reading time
         sum_result = engagement_results['sum_readtime']
         f.write("OVERALL READING TIME FOR ENTIRE STORY-PATH:\n")
         group_stats = sum_result['group_stats']
+        group_ci = sum_result.get('group_ci', {})
         for condition in ['free', 'pasv', 'yoke']:
             if condition in group_stats.index:
                 mean_val = group_stats.loc[condition, 'mean']
                 std_val = group_stats.loc[condition, 'std']
                 n_val = int(group_stats.loc[condition, 'count'])
                 cond_name = {'free': 'Free', 'pasv': 'Passive', 'yoke': 'Yoked'}[condition]
-                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}\n")
+                ci_str = format_ci(group_ci.get(condition, {}).get('ci_lower'), 
+                                   group_ci.get(condition, {}).get('ci_upper')) if condition in group_ci else "N/A"
+                f.write(f"  {cond_name}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}\n")
         f_stat = sum_result['f_stat']
         df_between = sum_result['df_between']
         df_within = sum_result['df_within']
         p_val = sum_result['p_value']
+        effect_sizes = sum_result.get('effect_sizes', {})
         if p_val < 0.001:
             p_text = "p < 0.001"
         else:
             p_text = f"p = {p_val:.3f}"
-        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n\n")
+        f.write(f"  One-Way ANOVA: F({df_between},{df_within}) = {f_stat:.3f}, {p_text}\n")
+        if 'eta_squared' in effect_sizes:
+            f.write(f"  η² = {effect_sizes['eta_squared']:.4f}\n")
+        if 'partial_eta_squared' in effect_sizes:
+            f.write(f"  ηp² = {effect_sizes['partial_eta_squared']:.4f}\n")
+        f.write("\n")
         
         f.write("These results suggest that the overall engagement for the story remained roughly the\n")
         f.write("same across the three agency conditions.\n")
@@ -336,14 +397,29 @@ def perform_engagement_anova(engagement_df, measure_name):
     # Calculate group means and standard deviations
     group_stats = engagement_df.groupby('condition')[measure_name].agg(['mean', 'std', 'count'])
     
+    # Calculate effect sizes
+    effect_sizes = calculate_anova_effect_sizes(anova_table)
+    
+    # Calculate confidence intervals for group means
+    group_ci = {}
+    for cond in group_stats.index:
+        cond_data = engagement_df[engagement_df['condition'] == cond][measure_name].values
+        ci_lower, ci_upper, mean_val = calculate_ci_mean(cond_data)
+        group_ci[cond] = {'ci_lower': ci_lower, 'ci_upper': ci_upper, 'mean': mean_val}
+    
     print(f"\n{measure_name.upper()} - One-Way ANOVA Results:")
     print(f"  F({df_between},{df_within}) = {f_stat:.3f}, p = {p_value:.3f}")
+    if 'eta_squared' in effect_sizes:
+        print(f"  η² = {effect_sizes['eta_squared']:.4f}")
+    if 'partial_eta_squared' in effect_sizes:
+        print(f"  ηp² = {effect_sizes['partial_eta_squared']:.4f}")
     print(f"\nGroup Statistics:")
     for cond in sorted(group_stats.index):
         mean_val = group_stats.loc[cond, 'mean']
         std_val = group_stats.loc[cond, 'std']
         n_val = int(group_stats.loc[cond, 'count'])
-        print(f"    {cond}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}")
+        ci_str = format_ci(group_ci[cond]['ci_lower'], group_ci[cond]['ci_upper'])
+        print(f"    {cond}: M = {mean_val:.3f}, SD = {std_val:.3f}, N = {n_val}, 95% CI = {ci_str}")
     
     return {
         'measure': measure_name,
@@ -352,6 +428,8 @@ def perform_engagement_anova(engagement_df, measure_name):
         'df_within': df_within,
         'p_value': p_value,
         'group_stats': group_stats,
+        'group_ci': group_ci,
+        'effect_sizes': effect_sizes,
         'anova_table': anova_table
     }
 

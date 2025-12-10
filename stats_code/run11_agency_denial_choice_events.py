@@ -20,8 +20,10 @@ Compare: Yoked not-want (denied) events vs Free not-want (granted) events
 import pandas as pd
 import numpy as np
 import os
+from scipy import stats
 from scipy.stats import ttest_ind, pearsonr
 from data_structure import RecallDataLoader
+from effect_size_utils import (cohens_d_two_sample, format_cohens_d, format_ci)
 
 def identify_story_paths(loader, story):
     """Identify story paths by matching free subjects to yoked subjects"""
@@ -237,10 +239,23 @@ def analyze_agency_denial():
         n = len(yoke_not_want_recall)
         df = 2 * n - 2
         
+        # Calculate Cohen's d and CI for mean difference
+        cohens_d = cohens_d_two_sample(yoke_not_want_recall, free_not_want_recall)
+        mean_diff = np.mean(yoke_not_want_recall) - np.mean(free_not_want_recall)
+        pooled_std = np.sqrt(((n - 1) * np.var(yoke_not_want_recall, ddof=1) + 
+                              (n - 1) * np.var(free_not_want_recall, ddof=1)) / (2 * n - 2))
+        sem_diff = pooled_std * np.sqrt(1/n + 1/n)
+        t_critical = stats.t.ppf(0.975, df=df)
+        ci_lower = mean_diff - t_critical * sem_diff
+        ci_upper = mean_diff + t_critical * sem_diff
+        
         print(f"\nTwo-sample t-test:")
         print(f"  Yoked not-want (denied) events: N = {n}, Mean = {np.mean(yoke_not_want_recall):.4f}, Std = {np.std(yoke_not_want_recall, ddof=1):.4f}")
         print(f"  Free not-want (granted) events: N = {n}, Mean = {np.mean(free_not_want_recall):.4f}, Std = {np.std(free_not_want_recall, ddof=1):.4f}")
         print(f"  t({df}) = {t_stat:.4f}, p = {p_val:.6f}")
+        if not np.isnan(cohens_d):
+            print(f"  {format_cohens_d(cohens_d)}")
+        print(f"  95% CI for mean difference: {format_ci(ci_lower, ci_upper)}")
         
         if p_val < 0.001:
             print(f"  Result: Significant difference (p < 0.001)")
@@ -359,6 +374,9 @@ def analyze_agency_denial():
             't_stat': t_stat,
             'p_val': p_val,
             'n': n,
+            'cohens_d': cohens_d,
+            'mean_diff_ci_lower': ci_lower,
+            'mean_diff_ci_upper': ci_upper,
             'pe_boost_data': pe_boost_data,
             'pe_boost_correlation': pe_boost_correlation
         }
@@ -447,6 +465,10 @@ def analyze_agency_denial():
         report_lines.append(f"  Yoked not-want (denied) events: Mean = {np.mean(results['yoke_not_want_recall']):.4f}, Std = {np.std(results['yoke_not_want_recall'], ddof=1):.4f}")
         report_lines.append(f"  Free not-want (granted) events: Mean = {np.mean(results['free_not_want_recall']):.4f}, Std = {np.std(results['free_not_want_recall'], ddof=1):.4f}")
         report_lines.append(f"  t({2*results['n']-2}) = {results['t_stat']:.4f}, p = {results['p_val']:.6f}")
+        if not np.isnan(results.get('cohens_d', np.nan)):
+            report_lines.append(f"  {format_cohens_d(results['cohens_d'])}")
+        ci_str = format_ci(results.get('mean_diff_ci_lower', np.nan), results.get('mean_diff_ci_upper', np.nan))
+        report_lines.append(f"  95% CI for mean difference: {ci_str}")
         if results['p_val'] < 0.001:
             report_lines.append(f"  Result: Significant difference (p < 0.001)")
         elif results['p_val'] < 0.01:

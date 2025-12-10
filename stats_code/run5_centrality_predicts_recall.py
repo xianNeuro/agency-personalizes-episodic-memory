@@ -19,6 +19,8 @@ import numpy as np
 import os
 from scipy.stats import ttest_1samp
 from data_structure import RecallDataLoader
+from effect_size_utils import (calculate_ci_mean, cohens_d_one_sample,
+                             format_ci, format_cohens_d)
 
 def load_centrality_data(story):
     """Load semantic and causal centrality data"""
@@ -80,6 +82,14 @@ def analyze_centrality_by_condition(df, story, use_z_transform=False):
         sem_t, sem_p = ttest_1samp(sem_ef, 0)
         caus_t, caus_p = ttest_1samp(caus_ef, 0)
         
+        # Calculate CI and Cohen's d for semantic
+        sem_ci_lower, sem_ci_upper, _ = calculate_ci_mean(sem_ef)
+        sem_cohens_d = cohens_d_one_sample(sem_ef, 0)
+        
+        # Calculate CI and Cohen's d for causal
+        caus_ci_lower, caus_ci_upper, _ = calculate_ci_mean(caus_ef)
+        caus_cohens_d = cohens_d_one_sample(caus_ef, 0)
+        
         results[condition] = {
             'sem_ef': {
                 'values': sem_ef,
@@ -87,7 +97,10 @@ def analyze_centrality_by_condition(df, story, use_z_transform=False):
                 'std': np.std(sem_ef, ddof=1),
                 'n': len(sem_ef),
                 't_stat': sem_t,
-                'p_val': sem_p
+                'p_val': sem_p,
+                'ci_lower': sem_ci_lower,
+                'ci_upper': sem_ci_upper,
+                'cohens_d': sem_cohens_d
             },
             'caus_ef': {
                 'values': caus_ef,
@@ -95,7 +108,10 @@ def analyze_centrality_by_condition(df, story, use_z_transform=False):
                 'std': np.std(caus_ef, ddof=1),
                 'n': len(caus_ef),
                 't_stat': caus_t,
-                'p_val': caus_p
+                'p_val': caus_p,
+                'ci_lower': caus_ci_lower,
+                'ci_upper': caus_ci_upper,
+                'cohens_d': caus_cohens_d
             }
         }
         
@@ -105,15 +121,21 @@ def analyze_centrality_by_condition(df, story, use_z_transform=False):
         print(f"    N: {len(sem_ef)}")
         print(f"    Mean {val_type}: {np.mean(sem_ef):.4f}")
         print(f"    Std: {np.std(sem_ef, ddof=1):.4f}")
+        print(f"    95% CI: {format_ci(sem_ci_lower, sem_ci_upper)}")
         print(f"    One-sample t-test (vs 0):")
         print(f"      t({len(sem_ef)-1}) = {sem_t:.4f}, p = {sem_p:.6f}")
+        if not np.isnan(sem_cohens_d):
+            print(f"      {format_cohens_d(sem_cohens_d)}")
         
         print(f"  Causal centrality (caus-ef):")
         print(f"    N: {len(caus_ef)}")
         print(f"    Mean {val_type}: {np.mean(caus_ef):.4f}")
         print(f"    Std: {np.std(caus_ef, ddof=1):.4f}")
+        print(f"    95% CI: {format_ci(caus_ci_lower, caus_ci_upper)}")
         print(f"    One-sample t-test (vs 0):")
         print(f"      t({len(caus_ef)-1}) = {caus_t:.4f}, p = {caus_p:.6f}")
+        if not np.isnan(caus_cohens_d):
+            print(f"      {format_cohens_d(caus_cohens_d)}")
     
     return results
 
@@ -182,7 +204,10 @@ def analyze_centrality():
                     'Mean': sem['mean'],
                     'Std': sem['std'],
                     't_statistic': sem['t_stat'],
-                    'p_value': sem['p_val']
+                    'p_value': sem['p_val'],
+                    'ci_lower': sem.get('ci_lower', np.nan),
+                    'ci_upper': sem.get('ci_upper', np.nan),
+                    'cohens_d': sem.get('cohens_d', np.nan)
                 })
                 
                 # Causal centrality
@@ -196,7 +221,10 @@ def analyze_centrality():
                     'Mean': caus['mean'],
                     'Std': caus['std'],
                     't_statistic': caus['t_stat'],
-                    'p_value': caus['p_val']
+                    'p_value': caus['p_val'],
+                    'ci_lower': caus.get('ci_lower', np.nan),
+                    'ci_upper': caus.get('ci_upper', np.nan),
+                    'cohens_d': caus.get('cohens_d', np.nan)
                 })
     
     summary_df = pd.DataFrame(summary_data)

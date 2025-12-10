@@ -22,32 +22,46 @@ ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from 
 FREE condition:
   N pairs = 153
   Mean = 0.1364
+  95% CI = [0.113, 0.159]
   t(152) = 11.7457, p < 0.001
+  d = 0.950
 
 YOKE condition:
   N pairs = 1378
   Mean = 0.2255
+  95% CI = [0.218, 0.233]
   t(1377) = 58.2879, p < 0.001
+  d = 1.570
 
 PASV condition:
   N pairs = 1485
   Mean = 0.2488
+  95% CI = [0.242, 0.256]
   t(1484) = 70.8707, p < 0.001
+  d = 1.839
 
 ANOVA ACROSS CONDITIONS:
 
   F(2,3013) = 48.1268, p < 0.001
+  η² = 0.0310
+  ηp² = 0.0310
 
 POST-HOC TESTS:
 
 Free vs Yoked:
   t = -7.2850, p < 0.001
+  d = -0.621
+  95% CI for mean difference = [-0.113, -0.065]
 
 Free vs Passive:
   t = -9.7308, p < 0.001
+  d = -0.826
+  95% CI for mean difference = [-0.135, -0.090]
 
 Yoked vs Passive:
   t = -4.4632, p < 0.001
+  d = -0.167
+  95% CI for mean difference = [-0.033, -0.013]
 
 
 ================================================================================
@@ -59,32 +73,46 @@ ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from 
 FREE condition:
   N pairs = 153
   Mean = 0.1568
+  95% CI = [0.133, 0.180]
   t(152) = 13.2116, p < 0.001
+  d = 1.068
 
 YOKE condition:
   N pairs = 1378
   Mean = 0.2187
+  95% CI = [0.210, 0.227]
   t(1377) = 51.4285, p < 0.001
+  d = 1.385
 
 PASV condition:
   N pairs = 1485
   Mean = 0.2287
+  95% CI = [0.221, 0.236]
   t(1484) = 59.0277, p < 0.001
+  d = 1.532
 
 ANOVA ACROSS CONDITIONS:
 
   F(2,3013) = 15.4453, p < 0.001
+  η² = 0.0101
+  ηp² = 0.0101
 
 POST-HOC TESTS:
 
 Free vs Yoked:
   t = -4.6320, p < 0.001
+  d = -0.395
+  95% CI for mean difference = [-0.088, -0.036]
 
 Free vs Passive:
   t = -5.6785, p < 0.001
+  d = -0.482
+  95% CI for mean difference = [-0.097, -0.047]
 
 Yoked vs Passive:
   t = -1.7388, p = 0.082
+  d = -0.065
+  95% CI for mean difference = [-0.021, 0.001]
 
 
 ================================================================================
@@ -96,32 +124,46 @@ ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from 
 FREE condition:
   N pairs = 153
   Mean = 0.1398
+  95% CI = [0.116, 0.163]
   t(152) = 11.6723, p < 0.001
+  d = 0.944
 
 YOKE condition:
   N pairs = 1378
   Mean = 0.2351
+  95% CI = [0.227, 0.243]
   t(1377) = 55.8268, p < 0.001
+  d = 1.504
 
 PASV condition:
   N pairs = 1485
   Mean = 0.2598
+  95% CI = [0.252, 0.267]
   t(1484) = 67.2585, p < 0.001
+  d = 1.745
 
 ANOVA ACROSS CONDITIONS:
 
   F(2,3013) = 45.9551, p < 0.001
+  η² = 0.0296
+  ηp² = 0.0296
 
 POST-HOC TESTS:
 
 Free vs Yoked:
   t = -7.1898, p < 0.001
+  d = -0.613
+  95% CI for mean difference = [-0.121, -0.069]
 
 Free vs Passive:
   t = -9.4960, p < 0.001
+  d = -0.806
+  95% CI for mean difference = [-0.145, -0.095]
 
 Yoked vs Passive:
   t = -4.3224, p < 0.001
+  d = -0.162
+  95% CI for mean difference = [-0.036, -0.013]
 
 
 ================================================================================
@@ -133,32 +175,46 @@ ONE-SAMPLE T-TESTS (testing if mean correlation is significantly different from 
 FREE condition:
   N pairs = 153
   Mean = 0.1614
+  95% CI = [0.137, 0.186]
   t(152) = 13.0774, p < 0.001
+  d = 1.057
 
 YOKE condition:
   N pairs = 1378
   Mean = 0.2291
+  95% CI = [0.220, 0.238]
   t(1377) = 49.0285, p < 0.001
+  d = 1.321
 
 PASV condition:
   N pairs = 1485
   Mean = 0.2393
+  95% CI = [0.231, 0.248]
   t(1484) = 55.8783, p < 0.001
+  d = 1.450
 
 ANOVA ACROSS CONDITIONS:
 
   F(2,3013) = 14.9747, p < 0.001
+  η² = 0.0098
+  ηp² = 0.0098
 
 POST-HOC TESTS:
 
 Free vs Yoked:
   t = -4.6357, p < 0.001
+  d = -0.395
+  95% CI for mean difference = [-0.096, -0.039]
 
 Free vs Passive:
   t = -5.5997, p < 0.001
+  d = -0.475
+  95% CI for mean difference = [-0.105, -0.051]
 
 Yoked vs Passive:
   t = -1.6095, p = 0.108
+  d = -0.060
+  95% CI for mean difference = [-0.023, 0.002]
 
 
 ================================================================================
