@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use these data and analysis materials, please cite as below."
+title: "Agency personalizes episodic memories: data and analysis repository"
+type: dataset
+authors:
+  - family-names: "Li"
+    given-names: "Xian"
+    orcid: "https://orcid.org/0000-0003-0108-7665"
+  - family-names: "Ni"
+    given-names: "Nicole Kim"
+  - family-names: "Born"
+    given-names: "Savannah J."
+  - family-names: "Gualano"
+    given-names: "Ria J."
+  - family-names: "Lee"
+    given-names: "Iris"
+  - family-names: "Bellana"
+    given-names: "Buddhika"
+  - family-names: "Chen"
+    given-names: "Janice"
+url: "https://github.com/xianNeuro/agency-personalizes-episodic-memory"
+repository-code: "https://github.com/xianNeuro/agency-personalizes-episodic-memory"
+license: "MIT"
