@@ -6,8 +6,9 @@ Data associated with the manuscript **"Agency personalizes episodic memories"**
 
 **Preprint**: [https://osf.io/preprints/psyarxiv/7evwj_v1](https://osf.io/preprints/psyarxiv/7evwj_v1)
 
-**Status**: Manuscript currently under revision at Nature Communications
+**Status**: Manuscript accepted (in principle) at Nature Communications
 
+**Archive**: Archived version of this repository https://doi.org/10.5281/zenodo.19124153
 ---
 
 ## Overview
