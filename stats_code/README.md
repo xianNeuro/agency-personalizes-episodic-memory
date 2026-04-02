@@ -286,7 +286,7 @@ The master script (`run_all_analyses.py`) writes four artifacts in `output/compr
 
 1. **`comprehensive_analysis_report.html`** — RUN-ordered technical appendix with manuscript prose and stats boxes (including η², post-hoc *d*/CIs, *r* CIs, and parsed RUN 11 *t*-tests where applicable).
 2. **`manuscript_results_full_statistics.html`** — same Results prose with expanded inline statistics (stats boxes omitted).
-3. **`comprehensive_analysis_report.pdf`** and **`manuscript_results_full_statistics.pdf`** — print-styled PDFs using `print_supplement.css` (requires [Playwright](https://playwright.dev/python/) and `playwright install chromium`).
+3. **`comprehensive_analysis_report.pdf`** (A4) and **`manuscript_results_full_statistics.pdf`** (US Letter, 612×792 pt, to match typical Nature Communications supplement PDFs) — print-styled via `print_supplement.css` (requires [Playwright](https://playwright.dev/python/) and `playwright install chromium`).
 
 `print_supplement.css` is copied into `output/comprehensive_report/` next to the HTML so relative links resolve for PDF generation.
 
