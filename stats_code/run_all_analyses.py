@@ -7,12 +7,22 @@ and full statistics inserted, organized by run number.
 
 import subprocess
 import os
+import html as html_escape_lib
+import shutil
 import pandas as pd
 import numpy as np
 import re
 from datetime import datetime
+from scipy import stats as scipy_stats
 from data_structure import RecallDataLoader
-from effect_size_utils import format_ci, format_cohens_d
+from effect_size_utils import (
+    format_ci,
+    format_cohens_d,
+    partial_eta_squared_from_f,
+    pearson_r_ci_fisher,
+    cohens_d_one_sample_from_t,
+    cohens_d_two_sample_from_t_balanced,
+)
 
 # Make loader available globally for stats extraction
 loader = None
@@ -255,7 +265,110 @@ def extract_all_statistics():
         print(f"Error loading run13 stats: {e}")
         stats['run13'] = None
     
+    # Run 11: parse agency denial t-test summary from text report (full t, df, d, CI)
+    try:
+        r11_report = os.path.join(loader.get_output_dir("run11_agency_denial_choice_events"),
+                                   "agency_denial_choice_events_report.txt")
+        stats['run11_ttests'] = _parse_run11_agency_denial_report(r11_report)
+    except Exception as e:
+        print(f"Error parsing run11 report: {e}")
+        stats['run11_ttests'] = {}
+    
     return stats
+
+
+def _parse_run11_agency_denial_report(path):
+    """Extract Adventure / Romance two-sample t-test lines from run11 report."""
+    out = {}
+    if not os.path.exists(path):
+        return out
+    with open(path, 'r', encoding='utf-8') as f:
+        text = f.read()
+
+    def _fill_from_segment(segment, story_key):
+        if not segment:
+            return
+        m_t = re.search(r't\((\d+)\)\s*=\s*([-0-9.]+),\s*p\s*=\s*([0-9.eE+-]+)', segment)
+        # Match Cohen's d line only (avoid matching "Std = ...")
+        m_d = re.search(r'(?:^|\n)\s*d\s*=\s*([-0-9.]+)', segment)
+        m_ci = re.search(r'95% CI for mean difference:\s*\[([-0-9.]+),\s*([-0-9.]+)\]', segment)
+        if m_t:
+            out[story_key] = {
+                'df': int(m_t.group(1)),
+                't': float(m_t.group(2)),
+                'p': float(m_t.group(3)),
+                'cohens_d': float(m_d.group(1)) if m_d else np.nan,
+                'ci_lo': float(m_ci.group(1)) if m_ci else np.nan,
+                'ci_hi': float(m_ci.group(2)) if m_ci else np.nan,
+            }
+
+    adv_i = text.find('ADVENTURE STORY')
+    rom_i = text.find('ROMANCE STORY')
+    if adv_i >= 0 and rom_i > adv_i:
+        _fill_from_segment(text[adv_i:rom_i], 'Adventure')
+    if rom_i >= 0:
+        _fill_from_segment(text[rom_i:], 'Romance')
+    return out
+
+def _anova_eta_suffix(f_val, df_b, df_w):
+    """Return ', η² = x, ηp² = y' for one-way ANOVA (η² = ηp² for single factor)."""
+    try:
+        f_val = float(f_val)
+        df_b = float(df_b)
+        df_w = float(df_w)
+        pe = partial_eta_squared_from_f(f_val, df_b, df_w)
+        if np.isnan(pe):
+            return ""
+        return f", η² = {pe:.4f}, ηp² = {pe:.4f}"
+    except (TypeError, ValueError):
+        return ""
+
+
+def _mean_ci_from_summary(mean, std, count, confidence=0.95):
+    """95% CI for a single-group mean given summary stats (t-based)."""
+    try:
+        mean = float(mean)
+        std = float(std)
+        count = int(count)
+    except (TypeError, ValueError):
+        return np.nan, np.nan
+    if count < 2 or std <= 0 or np.isnan(mean):
+        return np.nan, np.nan
+    sem = std / np.sqrt(count)
+    tcrit = scipy_stats.t.ppf(1 - (1 - confidence) / 2, df=count - 1)
+    m = tcrit * sem
+    return mean - m, mean + m
+
+
+def _append_posthoc_t_with_optional_d(html, label, t_stat, df_posthoc, p_val_posthoc):
+    """Post-hoc independent t-test line with Cohen's d (balanced-groups approximation from t and df)."""
+    html.append(f"{label}: t({format_stat_value(df_posthoc)}) = "
+                  f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}")
+    if pd.notna(t_stat) and pd.notna(df_posthoc):
+        try:
+            d = cohens_d_two_sample_from_t_balanced(float(t_stat), float(df_posthoc))
+            html.append(f", {format_cohens_d(d)}")
+        except (TypeError, ValueError, FloatingPointError):
+            pass
+    html.append("<br>")
+
+
+def _append_run2_posthoc_lines(html, posthoc_tests):
+    """Append post-hoc rows with d and mean-diff CI when present."""
+    if not posthoc_tests:
+        return
+    html.append("<br><strong>Post-hoc t-tests:</strong><br>")
+    for test in posthoc_tests:
+        html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
+                      f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}")
+        d = test.get('cohens_d')
+        if d is not None and not pd.isna(d):
+            html.append(f", {format_cohens_d(d)}")
+        lo, hi = test.get('mean_diff_ci_lower'), test.get('mean_diff_ci_upper')
+        if lo is not None and hi is not None and not (pd.isna(lo) or pd.isna(hi)):
+            html.append(f", 95% CI for mean difference = {format_ci(lo, hi)}")
+        html.append("<br>")
+
 
 def format_stat_value(val):
     """Format a statistical value for display"""
@@ -264,6 +377,9 @@ def format_stat_value(val):
     if isinstance(val, (int, np.integer)):
         return str(val)
     if isinstance(val, (float, np.floating)):
+        # Whole-number dfs and counts (avoid 2.000, 123.000); keep small decimals as p-values etc.
+        if val >= 1 and abs(val - round(val)) < 1e-6:
+            return str(int(round(val)))
         if abs(val) < 0.001:
             return f"{val:.6f}"
         elif abs(val) < 0.01:
@@ -271,6 +387,98 @@ def format_stat_value(val):
         else:
             return f"{val:.3f}"
     return str(val)
+
+
+def _run11_pe_boost_stat_line(story_label, pe_dict):
+    """Plain text for stat-inline: PE-boost vs % wanted correlation (run11 Excel outputs)."""
+    if not pe_dict:
+        return f"{story_label}: (PE-boost correlation not found in run11 output files)"
+    r = pe_dict.get("r")
+    p = pe_dict.get("p")
+    n = pe_dict.get("n")
+    if r is None or p is None or n is None or pd.isna(r) or pd.isna(p) or pd.isna(n):
+        return f"{story_label}: (incomplete PE-boost row in output)"
+    try:
+        nn = int(n)
+    except (TypeError, ValueError):
+        return f"{story_label}: (invalid N in PE-boost row)"
+    df_r = max(nn - 2, 0)
+    extra = ""
+    if nn >= 4:
+        lo, hi = pearson_r_ci_fisher(float(r), nn)
+        if not (np.isnan(lo) or np.isnan(hi)):
+            extra = f", 95% CI for r = {format_ci(lo, hi)}"
+    return (
+        f"{story_label}: r({df_r}) = {format_stat_value(r)}{extra}, "
+        f"p = {format_stat_value(p)} (N = {nn}); PE-boost vs. % choices wanted"
+    )
+
+
+def _format_run5_raw_bundle(stats, centrality_type):
+    """One-sample raw correlation summaries for Semantic or Causal (6 cells: 2 stories × 3 conditions)."""
+    if not stats.get("run5"):
+        return f"{centrality_type}: (run5 output not loaded)"
+    parts = []
+    for story in ("Adventure", "Romance"):
+        for cond in ("free", "yoke", "pasv"):
+            for row in stats["run5"]:
+                if row.get("Analysis") != "raw":
+                    continue
+                if row.get("Centrality_Type") != centrality_type:
+                    continue
+                if row.get("Story") != story:
+                    continue
+                if str(row.get("Condition", "")).lower() != cond:
+                    continue
+                mean_val = row.get("Mean", "")
+                t_stat = row.get("t_statistic", "")
+                p_val = row.get("p_value", "")
+                n = row.get("N", "")
+                if not (pd.notna(t_stat) and pd.notna(p_val) and pd.notna(n)):
+                    continue
+                ci_lower = row.get("ci_lower", np.nan)
+                ci_upper = row.get("ci_upper", np.nan)
+                cohens_d = row.get("cohens_d", np.nan)
+                chunk = (
+                    f"{story} {cond.upper()} {centrality_type}: mean r = {format_stat_value(mean_val)}, "
+                    f"95% CI = {format_ci(ci_lower, ci_upper)}, "
+                    f"t({format_stat_value(n - 1)}) = {format_stat_value(t_stat)}, "
+                    f"p = {format_stat_value(p_val)}"
+                )
+                if not pd.isna(cohens_d):
+                    chunk += f", {format_cohens_d(cohens_d)}"
+                parts.append(chunk)
+                break
+    return "; ".join(parts) if parts else f"{centrality_type}: (no raw rows in run5)"
+
+
+def _format_run7_neighbor_onesample_story(stats, story_name):
+    """One-sample neighbor encoding effect > 0, raw values, all three conditions."""
+    rows = [
+        r
+        for r in stats.get("run7", [])
+        if r.get("Analysis") == "One-sample t-test"
+        and r.get("Transform") == "Raw values"
+        and str(r.get("Story", "")) == story_name
+        and "Neighbor" in str(r.get("Measure", ""))
+    ]
+    if not rows:
+        return f"{story_name}: (no neighbor-encoding one-sample rows)"
+    order = {"free": 0, "yoke": 1, "pasv": 2}
+    rows.sort(key=lambda x: order.get(str(x.get("Condition", "")).lower(), 9))
+    parts = []
+    for r in rows:
+        cond = str(r.get("Condition", "")).upper()
+        n, m, t_stat, p_val = r.get("N"), r.get("Mean"), r.get("t_statistic"), r.get("p_value")
+        if pd.isna(t_stat) or pd.isna(p_val):
+            continue
+        df_one = int(n) - 1 if pd.notna(n) else "N/A"
+        parts.append(
+            f"{cond}: mean neighbor encoding r = {format_stat_value(m)}, "
+            f"t({df_one}) = {format_stat_value(t_stat)}, p = {format_stat_value(p_val)}"
+        )
+    return f"{story_name}: " + "; ".join(parts) if parts else f"{story_name}: (incomplete one-sample rows)"
+
 
 def get_posthoc_tests_for_anova(anova_p_val, posthoc_df, analysis_num=None, story=None, measure=None, transform=None):
     """Extract post-hoc tests for a significant ANOVA (p < 0.05)"""
@@ -320,7 +528,10 @@ def get_posthoc_tests_for_anova(anova_p_val, posthoc_df, analysis_num=None, stor
                             'comparison': comparison,
                             't_stat': t_stat,
                             'p_val': p_val,
-                            'df': df
+                            'df': df,
+                            'cohens_d': row.get('cohens_d', np.nan),
+                            'mean_diff_ci_lower': row.get('mean_diff_ci_lower', np.nan),
+                            'mean_diff_ci_upper': row.get('mean_diff_ci_upper', np.nan),
                         })
         # Handle list of dicts (from stats['run6'] or stats['run7'])
         elif isinstance(posthoc_df, list):
@@ -346,7 +557,10 @@ def get_posthoc_tests_for_anova(anova_p_val, posthoc_df, analysis_num=None, stor
                                 'comparison': comparison,
                                 't_stat': t_stat,
                                 'p_val': p_val,
-                                'df': df
+                                'df': df,
+                                'cohens_d': np.nan,
+                                'mean_diff_ci_lower': np.nan,
+                                'mean_diff_ci_upper': np.nan,
                             })
     
     return posthoc_results if posthoc_results else None
@@ -449,6 +663,7 @@ def generate_html_report(stats):
             font-weight: bold;
         }
     </style>
+    <link rel="stylesheet" href="print_supplement.css" media="print">
 </head>
 <body>
     <h1>Comprehensive Analysis Report: Agency Effects on Memory</h1>
@@ -470,12 +685,11 @@ def generate_html_report(stats):
     if stats.get('run1'):
         html.append("""<div class="stats-box"><strong>Statistical Results:</strong><br>""")
         for sheet_name, sheet_data in stats['run1'].items():
-            if 'anova' in sheet_name.lower():
+            if 'anova' in sheet_name.lower() and 'engagement' not in sheet_name.lower():
                 for row in sheet_data:
                     if row.get('Unnamed: 0') == 'C(condition)':
                         f_val = row.get('F', 'N/A')
                         df_between = row.get('df', 'N/A')
-                        # Get df_within from residual row
                         df_within = None
                         for r in sheet_data:
                             if r.get('Unnamed: 0') == 'Residual':
@@ -483,7 +697,21 @@ def generate_html_report(stats):
                                 break
                         p_val = row.get('PR(>F)', 'N/A')
                         story_name = 'Adventure' if 'Adventure' in sheet_name else 'Romance'
-                        html.append(f"{story_name}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = {format_stat_value(f_val)}, p = {format_stat_value(p_val)}<br>")
+                        eta_s = _anova_eta_suffix(f_val, df_between, df_within)
+                        html.append(f"{story_name}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
+                                    f"{format_stat_value(f_val)}, p = {format_stat_value(p_val)}{eta_s}<br>")
+        html.append("<br><strong>Group means with 95% CI (recall):</strong><br>")
+        for sheet_name, sheet_data in stats['run1'].items():
+            if sheet_name.endswith('_group_stats') and 'Engagement' not in sheet_name:
+                story_name = 'Adventure' if 'Adventure' in sheet_name else 'Romance'
+                for row in sheet_data:
+                    cond = row.get('condition', row.get('Condition', ''))
+                    m = row.get('mean', row.get('Mean'))
+                    s = row.get('std', row.get('Std', row.get('std')))
+                    c = row.get('count', row.get('Count', row.get('n')))
+                    lo, hi = _mean_ci_from_summary(m, s, c)
+                    html.append(f"{story_name} {cond}: M = {format_stat_value(m)}, "
+                                f"95% CI = {format_ci(lo, hi)}, n = {format_stat_value(c)}<br>")
         html.append("</div>")
     
     html.append("""
@@ -500,18 +728,37 @@ def generate_html_report(stats):
         # Transportation score
         if stats.get('run1_engagement_trans_score'):
             eng = stats['run1_engagement_trans_score']
-            html.append(f"Transportation Score: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+            eta_s = _anova_eta_suffix(eng.get('f_stat'), eng.get('df_between'), eng.get('df_within'))
+            html.append(f"Transportation Score: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = "
+                        f"{format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}{eta_s}<br>")
         
         # Average reading time per sentence
         if stats.get('run1_engagement_avg_sent_readtime'):
             eng = stats['run1_engagement_avg_sent_readtime']
-            html.append(f"Average Reading Time per Story Sentence: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+            eta_s = _anova_eta_suffix(eng.get('f_stat'), eng.get('df_between'), eng.get('df_within'))
+            html.append(f"Average Reading Time per Story Sentence: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = "
+                        f"{format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}{eta_s}<br>")
         
         # Total reading time
         if stats.get('run1_engagement_sum_readtime'):
             eng = stats['run1_engagement_sum_readtime']
-            html.append(f"Overall Reading Time for Entire Story-Path: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = {format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}<br>")
+            eta_s = _anova_eta_suffix(eng.get('f_stat'), eng.get('df_between'), eng.get('df_within'))
+            html.append(f"Overall Reading Time for Entire Story-Path: F({format_stat_value(eng.get('df_between'))},{format_stat_value(eng.get('df_within'))}) = "
+                        f"{format_stat_value(eng.get('f_stat'))}, p = {format_stat_value(eng.get('p_value'))}{eta_s}<br>")
         
+        html.append("<br><strong>Group means with 95% CI (Romance engagement):</strong><br>")
+        for sheet_name, sheet_data in stats.get('run1', {}).items():
+            if 'Engagement' in sheet_name and sheet_name.endswith('_stats'):
+                label = sheet_name.replace('Engagement_', '').replace('_stats', '')
+                label_map = {'trans_score': 'Transportation', 'avg_sent_readtime': 'Avg read time / sentence', 'sum_readtime': 'Total read time'}
+                nice = label_map.get(label, label)
+                for row in sheet_data:
+                    cond = row.get('condition', '')
+                    m = row.get('mean')
+                    s = row.get('std')
+                    c = row.get('count')
+                    lo, hi = _mean_ci_from_summary(m, s, c)
+                    html.append(f"{nice} — {cond}: M = {format_stat_value(m)}, 95% CI = {format_ci(lo, hi)}, n = {format_stat_value(c)}<br>")
         html.append("</div>")
     
     html.append("""
@@ -593,25 +840,16 @@ def generate_html_report(stats):
                         df_within = row.get('df_within', row.get('df2', ''))
                         p_val = row.get('p_value', row.get('PR(>F)', ''))
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                     
                     # Add post-hoc tests if ANOVA is significant (in same box)
                     if not anova1.empty:
                         p_val = anova1.iloc[0].get('p_value', 1.0)
                         if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
                             posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=1)
-                            if posthoc_tests:
-                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
-                                for test in posthoc_tests:
-                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
-                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}")
-                                    if 'cohens_d' in test and not pd.isna(test.get('cohens_d')):
-                                        html.append(f", {format_cohens_d(test['cohens_d'])}")
-                                    if 'mean_diff_ci_lower' in test and not pd.isna(test.get('mean_diff_ci_lower')):
-                                        ci_str = format_ci(test.get('mean_diff_ci_lower'), test.get('mean_diff_ci_upper'))
-                                        html.append(f", 95% CI for mean difference = {ci_str}")
-                                    html.append("<br>")
+                            _append_run2_posthoc_lines(html, posthoc_tests)
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -654,19 +892,16 @@ def generate_html_report(stats):
                         df_within = row.get('df_within', row.get('df2', ''))
                         p_val = row.get('p_value', row.get('PR(>F)', ''))
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                     
                     # Add post-hoc tests if ANOVA is significant (in same box)
                     if not anova2.empty:
                         p_val = anova2.iloc[0].get('p_value', 1.0)
                         if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
                             posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=2)
-                            if posthoc_tests:
-                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
-                                for test in posthoc_tests:
-                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
-                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
+                            _append_run2_posthoc_lines(html, posthoc_tests)
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -709,19 +944,16 @@ def generate_html_report(stats):
                         df_within = row.get('df_within', row.get('df2', ''))
                         p_val = row.get('p_value', row.get('PR(>F)', ''))
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                     
                     # Add post-hoc tests if ANOVA is significant (in same box)
                     if not anova3.empty:
                         p_val = anova3.iloc[0].get('p_value', 1.0)
                         if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
                             posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=3)
-                            if posthoc_tests:
-                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
-                                for test in posthoc_tests:
-                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
-                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
+                            _append_run2_posthoc_lines(html, posthoc_tests)
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -764,19 +996,16 @@ def generate_html_report(stats):
                         df_within = row.get('df_within', row.get('df2', ''))
                         p_val = row.get('p_value', row.get('PR(>F)', ''))
                         if pd.notna(f_stat) and pd.notna(df_between) and pd.notna(df_within):
+                            eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                             html.append(f"F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                     
                     # Add post-hoc tests if ANOVA is significant (in same box)
                     if not anova4.empty:
                         p_val = anova4.iloc[0].get('p_value', 1.0)
                         if pd.notna(p_val) and p_val < 0.05 and stats.get('run2_posthoc') is not None:
                             posthoc_tests = get_posthoc_tests_for_anova(p_val, stats['run2_posthoc'], analysis_num=4)
-                            if posthoc_tests:
-                                html.append("<br><strong>Post-hoc t-tests:</strong><br>")
-                                for test in posthoc_tests:
-                                    html.append(f"{test['comparison']}: t({format_stat_value(test['df'])}) = "
-                                              f"{format_stat_value(test['t_stat'])}, p = {format_stat_value(test['p_val'])}<br>")
+                            _append_run2_posthoc_lines(html, posthoc_tests)
                     html.append("</div>")
         except Exception as e:
             print(f"Error loading run2 ANOVA: {e}")
@@ -924,12 +1153,12 @@ def generate_html_report(stats):
         html.append("</div>")
     
     html.append("""
-            <p>Within-group Choice ISC was significantly above zero in both conditions (ps < 0.001), showing that 
+            <p>Within-group Choice ISC was significantly above zero in both conditions (<span class="stat-inline">Free: mean r = 0.208</span>; 
+            <span class="stat-inline">Yoke: mean r = 0.255</span>), showing that 
             certain choice options were intrinsically preferred over others. Comparing across conditions, Free 
-            participants had significantly reduced Choice ISC (<span class="stat-inline">mean r = 0.208</span>) 
-            compared to Yoked participants (<span class="stat-inline">mean r = 0.255</span>), indicating that 
+            participants had significantly reduced Choice ISC compared to Yoked participants (<span class="stat-inline">two-sample t-test: p = 0.035</span>), indicating that 
             agency (full as opposed to partial) induced greater individual variability in terms of which options 
-            were selected (<span class="stat-inline">p = 0.035</span>, two-sample t-test).</p>
+            were selected.</p>
         </div>
     </div>
 """)
@@ -975,7 +1204,15 @@ def generate_html_report(stats):
             n = row.get('N_subjects', '')
             r = row.get('Correlation_r', '')
             p = row.get('Correlation_p', '')
-            html.append(f"{analysis}: r({format_stat_value(n-2)}) = {format_stat_value(r)}, "
+            df_c = row.get('df', np.nan)
+            df_disp = int(df_c) if pd.notna(df_c) else (int(n) - 2 if pd.notna(n) else '')
+            nn = int(df_disp) + 2 if pd.notna(df_disp) and df_disp != '' else None
+            rci = ""
+            if nn and nn >= 4 and pd.notna(r):
+                lo, hi = pearson_r_ci_fisher(float(r), nn)
+                if not (np.isnan(lo) or np.isnan(hi)):
+                    rci = f", 95% CI for r = {format_ci(lo, hi)}"
+            html.append(f"{analysis}: r({format_stat_value(df_disp)}) = {format_stat_value(r)}{rci}, "
                       f"p = {format_stat_value(p)}<br>")
         html.append("</div>")
     
@@ -1056,7 +1293,9 @@ def generate_html_report(stats):
     
     html.append("""
             <p>For both stories, semantic centrality significantly predicted recall, i.e., a significant semantic 
-            influence on memory was observed, in all three conditions (ps < 0.001, one-sample t-tests against zero; 
+            influence on memory was observed, in all three conditions (<span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_format_run5_raw_bundle(stats, "Semantic"), quote=False))
+    html.append("""</span>; 
             <span class="supplement-ref">Supplement S8</span> and <span class="figure-ref">Supplementary Figure S8-2</span>).</p>
             
             <p>For causal narrative network analysis, independent human raters judged which pairs of events were 
@@ -1067,7 +1306,9 @@ def generate_html_report(stats):
             correlation between causal centrality and event-by-event recall for each participant.</p>
             
             <p>For both stories, causal centrality significantly predicted recall, i.e., a significant causal 
-            influence on memory was observed, in all three conditions (ps < 0.001, one-sample t-tests against zero; 
+            influence on memory was observed, in all three conditions (<span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_format_run5_raw_bundle(stats, "Causal"), quote=False))
+    html.append("""</span>; 
             <span class="supplement-ref">Supplement S8</span> and <span class="figure-ref">Supplementary Figure S8-2</span>).</p>
             
             <p>In sum, both semantic centrality and causal centrality predicted recall of interactive narratives, 
@@ -1097,8 +1338,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA p < 0.1 (in same box)
                 if pd.notna(p_val) and p_val < 0.1:
@@ -1127,8 +1369,8 @@ def generate_html_report(stats):
                             df_posthoc = posthoc.get('df_within', '')
                             # Only show post-hoc tests where p < 0.1
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Semantic Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -1141,8 +1383,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA p < 0.1 (in same box)
                 if pd.notna(p_val) and p_val < 0.1:
@@ -1171,8 +1414,8 @@ def generate_html_report(stats):
                             df_posthoc = posthoc.get('df_within', '')
                             # Only show post-hoc tests where p < 0.1
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Raw values):</strong><br>""")
@@ -1185,8 +1428,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA p < 0.1 (in same box)
                 if pd.notna(p_val) and p_val < 0.1:
@@ -1212,8 +1456,8 @@ def generate_html_report(stats):
                             df_posthoc = posthoc.get('df_within', '')
                             # Only show post-hoc tests where p < 0.1
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Causal Centrality - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -1226,8 +1470,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA p < 0.1 (in same box)
                 if pd.notna(p_val) and p_val < 0.1:
@@ -1253,8 +1498,8 @@ def generate_html_report(stats):
                             df_posthoc = posthoc.get('df_within', '')
                             # Only show post-hoc tests where p < 0.1
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc) and p_val_posthoc < 0.1:
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Raw values):</strong><br>""")
@@ -1266,8 +1511,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Repeated Measures ANOVA - Interaction (Fisher z-transformed):</strong><br>""")
@@ -1279,8 +1525,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
         html.append("</div>")
     
     html.append("""
@@ -1337,9 +1584,21 @@ def generate_html_report(stats):
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
-                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}, "
+                n_int = int(n) if pd.notna(n) else None
+                rci = ""
+                if mean_val is not None and n_int and n_int >= 4:
+                    lo, hi = pearson_r_ci_fisher(float(mean_val), n_int)
+                    if not (np.isnan(lo) or np.isnan(hi)):
+                        rci = f", 95% CI for r = {format_ci(lo, hi)}"
+                d_s = ""
+                if n_int and pd.notna(t_stat):
+                    try:
+                        d_s = f", {format_cohens_d(cohens_d_one_sample_from_t(float(t_stat), n_int))}"
+                    except (TypeError, ValueError):
+                        pass
+                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}{rci}, "
                           f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}{d_s}<br>")
         
         if romance_rows:
             html.append("Romance:<br>")
@@ -1349,9 +1608,21 @@ def generate_html_report(stats):
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
-                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}, "
+                n_int = int(n) if pd.notna(n) else None
+                rci = ""
+                if mean_val is not None and n_int and n_int >= 4:
+                    lo, hi = pearson_r_ci_fisher(float(mean_val), n_int)
+                    if not (np.isnan(lo) or np.isnan(hi)):
+                        rci = f", 95% CI for r = {format_ci(lo, hi)}"
+                d_s = ""
+                if n_int and pd.notna(t_stat):
+                    try:
+                        d_s = f", {format_cohens_d(cohens_d_one_sample_from_t(float(t_stat), n_int))}"
+                    except (TypeError, ValueError):
+                        pass
+                html.append(f"  {condition}: mean r = {format_stat_value(mean_val)}{rci}, "
                           f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}{d_s}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-sample t-tests (Fisher z-transformed):</strong><br>""")
@@ -1373,9 +1644,16 @@ def generate_html_report(stats):
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
+                n_int = int(n) if pd.notna(n) else None
+                d_s = ""
+                if n_int and pd.notna(t_stat):
+                    try:
+                        d_s = f", {format_cohens_d(cohens_d_one_sample_from_t(float(t_stat), n_int))}"
+                    except (TypeError, ValueError):
+                        pass
                 html.append(f"  {condition}: mean z = {format_stat_value(mean_val)}, "
                           f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}{d_s}<br>")
         
         if romance_rows:
             html.append("Romance:<br>")
@@ -1385,9 +1663,16 @@ def generate_html_report(stats):
                 t_stat = row.get('t_statistic', '')
                 p_val = row.get('p_value', '')
                 n = row.get('N', '')
+                n_int = int(n) if pd.notna(n) else None
+                d_s = ""
+                if n_int and pd.notna(t_stat):
+                    try:
+                        d_s = f", {format_cohens_d(cohens_d_one_sample_from_t(float(t_stat), n_int))}"
+                    except (TypeError, ValueError):
+                        pass
                 html.append(f"  {condition}: mean z = {format_stat_value(mean_val)}, "
                           f"t({format_stat_value(n-1)}) = {format_stat_value(t_stat)}, "
-                          f"p = {format_stat_value(p_val)}<br>")
+                          f"p = {format_stat_value(p_val)}{d_s}<br>")
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Raw values):</strong><br>""")
@@ -1399,8 +1684,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA is significant (in same box)
                 if pd.notna(p_val) and p_val < 0.05:
@@ -1418,8 +1704,8 @@ def generate_html_report(stats):
                             p_val_posthoc = posthoc.get('p_value', '')
                             df_posthoc = posthoc.get('df_within', '')
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc):
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
         
         html.append("""<div class="stats-box"><strong>Neighbor Encoding Effect - One-way ANOVA (Fisher z-transformed):</strong><br>""")
@@ -1431,8 +1717,9 @@ def generate_html_report(stats):
                 df_between = row.get('df_between', '')
                 df_within = row.get('df_within', '')
                 p_val = row.get('p_value', '')
+                eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
                 html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                          f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
                 
                 # Add post-hoc tests if ANOVA is significant (in same box)
                 if pd.notna(p_val) and p_val < 0.05:
@@ -1450,13 +1737,18 @@ def generate_html_report(stats):
                             p_val_posthoc = posthoc.get('p_value', '')
                             df_posthoc = posthoc.get('df_within', '')
                             if pd.notna(t_stat) and pd.notna(p_val_posthoc):
-                                html.append(f"{story} {comparison}: t({format_stat_value(df_posthoc)}) = "
-                                          f"{format_stat_value(t_stat)}, p = {format_stat_value(p_val_posthoc)}<br>")
+                                _append_posthoc_t_with_optional_d(
+                                    html, f"{story} {comparison}", t_stat, df_posthoc, p_val_posthoc)
         html.append("</div>")
     
     html.append("""
             <p>The neighbor encoding effect was positive in all three conditions for both stories 
-            (Adventure and Romance, ps < 0.001), and significantly different across the three conditions 
+            (<span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_format_run7_neighbor_onesample_story(stats, "Adventure"), quote=False))
+    html.append("""</span>; 
+            <span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_format_run7_neighbor_onesample_story(stats, "Romance"), quote=False))
+    html.append("""</span>), and significantly different across the three conditions 
             in the Romance story, with Free having a higher neighbor encoding effect compared to Yoked and 
             Passive (<span class="stat-inline">F(2,123) = 12.07, p < 0.001</span>; post-hoc tests: 
             <span class="stat-inline">Free vs. Yoked, p = 0.002</span>; 
@@ -1495,8 +1787,9 @@ def generate_html_report(stats):
             df_between = row.get('df_between', '')
             df_within = row.get('df_within', '')
             p_val = row.get('p_value', '')
+            eta_s = _anova_eta_suffix(f_stat, df_between, df_within)
             html.append(f"{story}: F({format_stat_value(df_between)},{format_stat_value(df_within)}) = "
-                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}<br>")
+                      f"{format_stat_value(f_stat)}, p = {format_stat_value(p_val)}{eta_s}<br>")
         html.append("</div>")
     
     html.append("""
@@ -1535,7 +1828,13 @@ def generate_html_report(stats):
                 n = row.get('n', row.get('N_subjects', ''))
                 r = row.get('r', '')
                 p = row.get('p_value', '')
-                html.append(f"N={n}: r({format_stat_value(n-2)}) = {format_stat_value(r)}, "
+                nn = int(n) if pd.notna(n) else None
+                rci = ""
+                if nn and nn >= 4 and pd.notna(r):
+                    lo, hi = pearson_r_ci_fisher(float(r), nn)
+                    if not (np.isnan(lo) or np.isnan(hi)):
+                        rci = f", 95% CI for r = {format_ci(lo, hi)}"
+                html.append(f"N={n}: r({format_stat_value(n-2)}) = {format_stat_value(r)}{rci}, "
                           f"p = {format_stat_value(p)}<br>")
         html.append("</div>")
     
@@ -1544,7 +1843,9 @@ def generate_html_report(stats):
             (<span class="stat-inline">Romance: r(16) = -.519, p = 0.027</span>) as well as when using the full sample 
             (<span class="stat-inline">Romance: r(98) = -.460, p < 0.001</span>; 
             <span class="supplement-ref">Supplement S10</span> and <span class="figure-ref">Supplementary Figure S10A</span>). 
-            Choice divergence, however, was not significantly correlated with semantic network scores. Note that these 
+            Choice divergence, however, was not significantly correlated with semantic network scores 
+            (<span class="stat-inline">Romance: r(16) = -.111, p = .663</span>; 
+            <span class="stat-inline">r(98) = -.164, p = .104</span>). Note that these 
             comparisons could only be made for the Romance story, as the analyses of divergence depend on the shared 
             story sections.</p>
         </div>
@@ -1574,18 +1875,28 @@ def generate_html_report(stats):
                 measure2 = row.get('Measure2', '')
                 r = row.get('r', '')
                 p = row.get('p_value', '')
+                nn = int(n) if pd.notna(n) else None
+                rci = ""
+                if nn and nn >= 4 and pd.notna(r):
+                    lo, hi = pearson_r_ci_fisher(float(r), nn)
+                    if not (np.isnan(lo) or np.isnan(hi)):
+                        rci = f", 95% CI for r = {format_ci(lo, hi)}"
                 html.append(f"{story} (N={n}): {measure1} vs {measure2}: r({format_stat_value(n-2)}) = "
-                          f"{format_stat_value(r)}, p = {format_stat_value(p)}<br>")
+                          f"{format_stat_value(r)}{rci}, p = {format_stat_value(p)}<br>")
         html.append("</div>")
         
-        html.append("""<div class="stats-box"><strong>Multiple Linear Regression (Romance, N=100):</strong><br>""")
+        html.append("""<div class="stats-box"><strong>Multiple Linear Regression (predicting memory divergence, Romance):</strong><br>""")
         for row in stats['run10']:
-            if (row.get('Analysis') == 'Multiple Regression' and
-                row.get('N_subjects') == 100):
+            if row.get('Analysis') == 'Multiple Regression':
+                n_sub = row.get('N_subjects', '')
                 nghb_p = row.get('p_value', '')
                 sem_p = row.get('sem_p', '')
-                html.append(f"Neighbor Encoding Effect: p = {format_stat_value(nghb_p)}<br>")
-                html.append(f"Semantic Influence: p = {format_stat_value(sem_p)}<br>")
+                r2 = row.get('r_squared', np.nan)
+                nb = row.get('nghb_coef', np.nan)
+                sb = row.get('sem_coef', np.nan)
+                html.append(f"N = {format_stat_value(n_sub)}: R² = {format_stat_value(r2)}; "
+                            f"β_neighbor = {format_stat_value(nb)}, p = {format_stat_value(nghb_p)}; "
+                            f"β_semantic = {format_stat_value(sb)}, p = {format_stat_value(sem_p)}<br>")
         html.append("</div>")
     
     html.append("""
@@ -1620,9 +1931,23 @@ def generate_html_report(stats):
             the denied choice events is selectively reduced compared to its choice-granted counterparts in the Free condition</p>
 """)
     
-    if stats.get('run11_ba') or stats.get('run11_mv'):
+    if stats.get('run11_ttests'):
+        html.append("""<div class="stats-box"><strong>Agency Denial Effect - Two-sample t-test (denied vs granted choice events):</strong><br>""")
+        for story in ('Adventure', 'Romance'):
+            tt = stats['run11_ttests'].get(story)
+            if not tt:
+                continue
+            ci_s = ""
+            if not (pd.isna(tt.get('ci_lo')) or pd.isna(tt.get('ci_hi'))):
+                ci_s = f", 95% CI for mean difference = {format_ci(tt['ci_lo'], tt['ci_hi'])}"
+            d_s = ""
+            if not pd.isna(tt.get('cohens_d')):
+                d_s = f", {format_cohens_d(tt['cohens_d'])}"
+            html.append(f"{story}: t({tt['df']}) = {format_stat_value(tt['t'])}, "
+                        f"p = {format_stat_value(tt['p'])}{d_s}{ci_s}<br>")
+        html.append("</div>")
+    elif stats.get('run11_ba') or stats.get('run11_mv'):
         html.append("""<div class="stats-box"><strong>Agency Denial Effect - Two-sample t-test:</strong><br>""")
-        # Extract from report text if available, or compute from detailed files
         html.append("Adventure: p = 0.015<br>")
         html.append("Romance: p = 0.017<br>")
         html.append("</div>")
@@ -1636,50 +1961,15 @@ def generate_html_report(stats):
             <p>The percentage of choices granted in the Yoked participants was not predictive of individual's recall performance, 
             recall similarity to their Free and Passive condition counterparts, semantic and causal centrality effects on memory, 
             nor their neighbor encoding effects (all ps>.3); however, higher percentage of choices granted predicted greater 
-            individual tendency to forget the choice-denied events (""")
-    
-    # Add PE-boost correlation results first
-    if stats.get('run11_pe_boost_corr_ba') or stats.get('run11_pe_boost_corr_mv'):
-        pe_boost_corr_parts = []
-        if stats.get('run11_pe_boost_corr_ba'):
-            pe_corr_ba = stats['run11_pe_boost_corr_ba']
-            r_val = pe_corr_ba.get('r', 0)
-            p_val = pe_corr_ba.get('p', 1)
-            df_val = pe_corr_ba.get('df', 0)
-            pe_boost_corr_parts.append(f"Adventure: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
-        
-        if stats.get('run11_pe_boost_corr_mv'):
-            pe_corr_mv = stats['run11_pe_boost_corr_mv']
-            r_val = pe_corr_mv.get('r', 0)
-            p_val = pe_corr_mv.get('p', 1)
-            df_val = pe_corr_mv.get('df', 0)
-            pe_boost_corr_parts.append(f"Romance: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
-        
-        if pe_boost_corr_parts:
-            html.append("PE-boost (correlation between want-not and recall vectors per subject) vs percentage wanted: ")
-            html.append(". ".join(pe_boost_corr_parts) + ". ")
-    
-    # Add correlation results
-    if stats.get('run11_corr_ba') or stats.get('run11_corr_mv'):
-        corr_parts = []
-        if stats.get('run11_corr_ba'):
-            corr_ba = stats['run11_corr_ba']
-            r_val = corr_ba.get('r', 0)
-            p_val = corr_ba.get('p', 1)
-            df_val = corr_ba.get('df', 0)
-            corr_parts.append(f"Adventure: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
-        
-        if stats.get('run11_corr_mv'):
-            corr_mv = stats['run11_corr_mv']
-            r_val = corr_mv.get('r', 0)
-            p_val = corr_mv.get('p', 1)
-            df_val = corr_mv.get('df', 0)
-            corr_parts.append(f"Romance: r({df_val}) = {format_stat_value(abs(r_val))}, p = {format_stat_value(p_val)}")
-        
-        if corr_parts:
-            html.append(". ".join(corr_parts) + ". ")
-    
-    html.append("""see <span class="supplement-ref">Supplement S7</span> for details).</p>
+            individual tendency to forget the choice-denied events (
+            PE-boost (correlation between want-not and recall vectors per subject) vs percentage wanted:
+            <span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_run11_pe_boost_stat_line("Adventure", stats.get("run11_pe_boost_corr_ba")), quote=False))
+    html.append("""</span>; 
+            <span class="stat-inline">""")
+    html.append(html_escape_lib.escape(_run11_pe_boost_stat_line("Romance", stats.get("run11_pe_boost_corr_mv")), quote=False))
+    html.append("""</span>;
+            see <span class="supplement-ref">Supplement S7</span> for details).</p>
             
             <p>Together, these results suggest that in a context lacking full agentive control, perceived agency and their 
             effects on memory could vary across individuals in non-systematic ways. The one exception is that with more control 
@@ -1752,6 +2042,28 @@ def run_all_analyses():
         f.write(html_report)
     
     print(f"Saved comprehensive HTML report to: {html_file}")
+
+    from manuscript_aligned_report import generate_manuscript_aligned_html
+
+    aligned_file = os.path.join(output_dir, "manuscript_results_full_statistics.html")
+    with open(aligned_file, 'w', encoding='utf-8') as f:
+        f.write(generate_manuscript_aligned_html(stats, loader))
+    print(f"Saved manuscript-aligned expanded statistics report to: {aligned_file}")
+
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _pcss = os.path.join(_here, "print_supplement.css")
+    if os.path.isfile(_pcss):
+        shutil.copy2(_pcss, os.path.join(output_dir, "print_supplement.css"))
+    try:
+        from html_to_pdf import write_pdfs_from_html
+
+        print("\n" + "=" * 80)
+        print("GENERATING PDF REPORTS")
+        print("=" * 80)
+        write_pdfs_from_html(output_dir)
+    except Exception as pdf_exc:
+        print(f"PDF generation error: {pdf_exc}")
+
     print("\n" + "="*80)
     print("All analyses complete!")
     print("="*80)

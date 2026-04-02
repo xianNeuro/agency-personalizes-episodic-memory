@@ -249,6 +249,53 @@ def format_cohens_d(d, decimals=3):
     
     return f"d = {d:.{decimals}f}"
 
+def partial_eta_squared_from_f(F, df_between, df_within):
+    """
+    Partial eta-squared for a fixed effect in ANOVA from F and dfs.
+    ηp² = F * df_between / (F * df_between + df_within)
+    For a balanced one-way ANOVA, classical η² equals partial η² for the factor.
+    """
+    F = float(F)
+    df_between = float(df_between)
+    df_within = float(df_within)
+    denom = F * df_between + df_within
+    if denom == 0:
+        return np.nan
+    return (F * df_between) / denom
+
+
+def pearson_r_ci_fisher(r, n, confidence=0.95):
+    """
+    Approximate two-sided CI for Pearson r using Fisher z transformation.
+    Requires n >= 4 for stable SE (uses n - 3 in SE denominator).
+    """
+    r = float(r)
+    n = int(n)
+    if n < 4 or abs(r) >= 1.0:
+        return np.nan, np.nan
+    z = np.arctanh(np.clip(r, -0.999999, 0.999999))
+    se = 1.0 / np.sqrt(max(n - 3, 1))
+    alpha = 1 - confidence
+    zcrit = stats.norm.ppf(1 - alpha / 2)
+    lo_z, hi_z = z - zcrit * se, z + zcrit * se
+    return np.tanh(lo_z), np.tanh(hi_z)
+
+
+def cohens_d_one_sample_from_t(t, n):
+    """Cohen's d for one-sample t vs 0: d = M/sd = t/sqrt(n)."""
+    return float(t) / np.sqrt(float(n))
+
+
+def cohens_d_two_sample_from_t_balanced(t, df_total):
+    """
+    Cohen's d from independent-samples t when groups are ~balanced:
+    df_total = n1 + n2 - 2, n1 = n2 = (df_total + 2) / 2.
+    d = t * sqrt(1/n1 + 1/n2) = 2*t / sqrt(df_total + 2).
+    """
+    df_total = float(df_total)
+    return float(t) * 2.0 / np.sqrt(df_total + 2.0)
+
+
 def interpret_cohens_d(d):
     """
     Interpret Cohen's d effect size

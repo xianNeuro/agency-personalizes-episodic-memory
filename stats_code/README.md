@@ -282,15 +282,13 @@ Each analysis script generates output in its respective folder under `output/`:
 
 ### Comprehensive Report
 
-The master script (`run_all_analyses.py`) generates a comprehensive HTML report:
+The master script (`run_all_analyses.py`) writes four artifacts in `output/comprehensive_report/`:
 
-**Location**: `output/comprehensive_report/comprehensive_analysis_report.html`
+1. **`comprehensive_analysis_report.html`** — RUN-ordered technical appendix with manuscript prose and stats boxes (including η², post-hoc *d*/CIs, *r* CIs, and parsed RUN 11 *t*-tests where applicable).
+2. **`manuscript_results_full_statistics.html`** — same Results prose with expanded inline statistics (stats boxes omitted).
+3. **`comprehensive_analysis_report.pdf`** and **`manuscript_results_full_statistics.pdf`** — print-styled PDFs using `print_supplement.css` (requires [Playwright](https://playwright.dev/python/) and `playwright install chromium`).
 
-This report contains:
-- Complete manuscript results section text
-- Full statistics inserted at appropriate locations
-- All 13 analyses organized by RUN number
-- Formatted with proper styling for easy reading
+`print_supplement.css` is copied into `output/comprehensive_report/` next to the HTML so relative links resolve for PDF generation.
 
 ## Key Statistical Methods
 

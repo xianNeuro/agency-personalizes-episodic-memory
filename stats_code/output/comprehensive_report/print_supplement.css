@@ -1,0 +1,124 @@
+/*
+ * Print / PDF styling aligned with Nature Communications supplementary PDF norms.
+ * Tune body font-size, line-height, and paragraph margins against your Word SI
+ * (e.g. Li_et_al_Supplement.docx Normal/Body style).
+ */
+@media print {
+    @page {
+        margin: 2cm;
+    }
+
+    body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 11pt;
+        line-height: 1.45;
+        color: #000;
+        background: #fff;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .manuscript-text {
+        font-size: 11pt;
+        text-align: justify;
+        margin: 0;
+        line-height: 1.45;
+    }
+
+    .manuscript-text p {
+        margin: 0 0 10pt 0;
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Intro block at top of manuscript_results_full_statistics (supplement-style lead-in) */
+    .si-intro {
+        font-size: 11pt;
+        line-height: 1.45;
+        text-align: justify;
+        margin: 0 0 12pt 0;
+    }
+
+    .si-intro p {
+        margin: 0 0 10pt 0;
+    }
+
+    h1 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin: 12pt 0 6pt 0;
+        page-break-after: avoid;
+        color: #000;
+        border: none;
+        padding: 0;
+    }
+
+    h2 {
+        font-size: 11pt;
+        font-weight: bold;
+        margin: 14pt 0 8pt 0;
+        page-break-after: avoid;
+        border: none;
+        color: #000;
+        padding: 0;
+        line-height: 1.35;
+    }
+
+    h3 {
+        font-size: 11pt;
+        font-weight: bold;
+        margin: 8pt 0 3pt 0;
+        color: #000;
+    }
+
+    .run-section {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 0 12pt 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .stat-inline {
+        background: #eee !important;
+        color: #000 !important;
+        font-weight: 600;
+        padding: 2px 4px !important;
+        border-radius: 0 !important;
+        line-height: 1.5;
+        vertical-align: baseline;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
+
+    .stats-box {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 9pt;
+        line-height: 1.2;
+        background: #f5f5f5 !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+    }
+
+    .figure-ref {
+        font-style: italic;
+        color: #000 !important;
+    }
+
+    .supplement-ref {
+        font-style: italic;
+        font-weight: normal;
+        color: #000 !important;
+    }
+
+    .note {
+        border: 1px solid #999 !important;
+        background: #f9f9f9 !important;
+        page-break-inside: avoid;
+    }
+
+    table {
+        font-size: 9pt;
+    }
+}
